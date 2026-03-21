@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSnackbar } from 'notistack';
+import GoogleLogin from '@/components/GoogleLogin';
 import { authApi, ApiError, resumeApi } from '@/lib/api';
 
 export default function SignUpPage() {
@@ -236,6 +237,8 @@ export default function SignUpPage() {
               <span className="px-4 bg-white text-gray-500 font-mono">// or</span>
             </div>
           </div>
+
+          <GoogleLogin mode="signup" />
 
           {/* Sign In Link */}
           <div className="text-center">

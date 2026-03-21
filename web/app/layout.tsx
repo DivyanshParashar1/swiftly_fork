@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Providers from "@/components/Providers";
 import { Analytics } from "@vercel/analytics/next"
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,17 +32,25 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
   return (
+
+
+
     <html lang="en" className="scroll-smooth">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <GoogleOAuthProvider clientId={googleClientId!}>
         <Analytics/>
         <Providers>
           <Navbar />
           {children}
           <Footer />
         </Providers>
+        </GoogleOAuthProvider>
       </body>
     </html>
   );
