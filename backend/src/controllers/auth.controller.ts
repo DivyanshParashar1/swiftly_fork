@@ -7,6 +7,8 @@ import { ApiResponse } from "../utils/apiResponse.utils";
 import { generateAccessToken, generateRefreshToken } from "../utils/jwt.utils";
 import { hash, verifyPassword } from "../utils/bcrypt.utils";
 import cookieParser from "cookie-parser";
+import { googleClientId, googleOAuth2Client } from "../utils/googleOauth2";
+import { log } from "node:console";
 
 
 const Auth = new AuthService()
@@ -26,17 +28,17 @@ export const signUp = asyncHandler(async (req: Request, res: Response)=>{
         email: email.trim().toLowerCase(),
         fullName,
         phone,
-        provider,
+        provider, 
         providerId,
-        hashedPassword
+        hashedPassword,
     } as createUserInput
 
     
     const createdUser = await Auth.createUser(data)
-    const accessToken = generateAccessToken(createdUser.id)
-    const refreshToken = generateRefreshToken(createdUser.id)
+    const accessToken = generateAccessToken(createdUser!.id)
+    const refreshToken = generateRefreshToken(createdUser!.id)
     
-    await Auth.saveRefreshToken(createdUser.id, refreshToken)
+    await Auth.saveRefreshToken(createdUser!.id, refreshToken)
 
     const options : CookieOptions= {
         httpOnly: true,
@@ -50,7 +52,7 @@ export const signUp = asyncHandler(async (req: Request, res: Response)=>{
             .status(201)
             .cookie("accessToken", accessToken,options)
             .cookie("refreshToken", refreshToken, options)
-            .json(new ApiResponse(201, createdUser.email, "User registered successfully"))
+            .json(new ApiResponse(201, createdUser!.email, "User registered successfully"))
 
 })
 
@@ -71,15 +73,16 @@ export const signIn = asyncHandler(async(req:Request, res: Response)=>{
         provider:provider
     }
 
-    if(!email.trim().toLowerCase() || !hashedPassword.trim()){
-        throw new ApiError(400, "Email and Password are required")
-    }
-
     const user = await Auth.findUserbyEmail(userData.email)
-    const userAuthDetails = await Auth.getUserAuthAccount(user?.id as string, userData.provider )
+    
 
     if(!user){
         throw new ApiError(400, "user does not exist")
+    }
+    const userAuthDetails = await Auth.getUserAuthAccount(user?.id as string, userData.provider )
+
+    if(!userAuthDetails){
+        throw new ApiError(400, "password login not available for this user, please use your google account to login")
     }
 
     const isPasswordValid = await verifyPassword(userData.hashedPassword, userAuthDetails?.passwordHash as string )
@@ -134,5 +137,70 @@ export const logout = asyncHandler(async(req:AuthRequest, res:Response)=>{
     
 
 
+
+})
+
+
+export const googleAuth = asyncHandler(async(req:AuthRequest, res:Response)=>{
+
+    const googleCode = req.query.code
+
+    const googleTokens = await googleOAuth2Client.getToken(googleCode as string)
+
+    const ticket = await googleOAuth2Client.verifyIdToken({
+        idToken: googleTokens.tokens.id_token!,
+        audience: googleClientId
+
+    })
+
+    const payload = ticket.getPayload()
+    
+    if(payload?.email_verified){
+        const email = payload.email
+        const fullName = payload.name
+        const providerId = payload.sub
+        const avatar = payload.picture
+
+
+        const data: createUserInput = {
+            email: email,
+            fullName: fullName,
+            provider: "google",
+            providerId: providerId,
+            avatar: avatar
+        }as createUserInput
+
+        
+        const user = await Auth.createUser(data)
+
+        log("This is the user returned from google auth",user)
+
+        const accessToken = generateAccessToken(user!.id)
+        const refreshToken = generateRefreshToken(user!.id)
+    
+        await Auth.saveRefreshToken(user!.id, refreshToken)
+
+        const options : CookieOptions= {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+            domain: ".swiftly.nakshjoshi.in",
+            path: "/"
+        }
+
+        return res
+                .status(201)
+                .cookie("accessToken", accessToken,options)
+                .cookie("refreshToken", refreshToken, options)
+                .json(new ApiResponse(201, user!.email, "User registered successfully"))
+
+
+
+
+
+
+    }
+
+    
 
 })

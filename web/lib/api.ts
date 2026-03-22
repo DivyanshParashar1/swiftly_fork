@@ -250,7 +250,23 @@ function handleAxiosError(error: unknown): never {
   throw new ApiError('Something went wrong', 500);
 }
 
+
+
+
+
 export const authApi = {
+
+  googleAuth: async (code:string): Promise<any> => {
+
+    try {
+      const response = await apiClient.get(`/api/v1/auth/google/callback?code=${code}`);
+      return response;
+    } catch (error) {
+      handleAxiosError(error)
+    }
+  },
+
+
   signUp: async (data: SignUpData): Promise<ApiResponse> => {
     try {
       const response = await apiClient.post<ApiResponse>('/api/v1/auth/signup', data);
@@ -399,5 +415,9 @@ export const updateApi = {
     }
   },
 };
+
+
+
+
 
 export { ApiError };

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSnackbar } from 'notistack';
+import GoogleLogin from '@/components/GoogleLogin';
 import { authApi, ApiError, resumeApi } from '@/lib/api';
 
 export default function SignInPage() {
@@ -159,6 +160,8 @@ export default function SignInPage() {
               <span className="px-4 bg-white text-gray-500 font-mono">// or</span>
             </div>
           </div>
+
+          <GoogleLogin mode="signin" />
 
           <div className="text-center">
             <p className="text-gray-600">

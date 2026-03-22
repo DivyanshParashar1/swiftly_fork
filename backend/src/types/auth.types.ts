@@ -4,6 +4,7 @@ export type BaseUser = {
     fullName:string
     email:string
     phone:string
+    avatar:string
 }
 
 export type CredentialUser = BaseUser & {
