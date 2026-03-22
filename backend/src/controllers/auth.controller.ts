@@ -52,7 +52,7 @@ export const signUp = asyncHandler(async (req: Request, res: Response)=>{
             .status(201)
             .cookie("accessToken", accessToken,options)
             .cookie("refreshToken", refreshToken, options)
-            .json(new ApiResponse(201, createdUser!.email, "User registered successfully"))
+            .json(new ApiResponse(201, createdUser, "User registered successfully"))
 
 })
 
@@ -103,7 +103,7 @@ export const signIn = asyncHandler(async(req:Request, res: Response)=>{
         res
             .cookie("accessToken", accessToken,options)
             .cookie("refreshToken", refreshToken, options)
-            .json(new ApiResponse(201,null,"loggedIn"))
+            .json(new ApiResponse(201,user,"loggedIn"))
 
     }
 
@@ -192,7 +192,7 @@ export const googleAuth = asyncHandler(async(req:AuthRequest, res:Response)=>{
                 .status(201)
                 .cookie("accessToken", accessToken,options)
                 .cookie("refreshToken", refreshToken, options)
-                .json(new ApiResponse(201, user!.email, "User registered successfully"))
+                .json(new ApiResponse(201, user, "User registered successfully"))
 
 
 
