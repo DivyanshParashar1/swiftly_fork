@@ -8,8 +8,7 @@ import type { AuthUser } from '@/lib/api';
 export default function Navbar() {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
-
-  console.log(authUser?.avatarUrl);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
 
   useEffect(() => {
@@ -33,6 +32,26 @@ export default function Navbar() {
     setAvatarLoadFailed(false);
   }, [authUser?.avatarUrl]);
 
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', onEscape);
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      window.removeEventListener('keydown', onEscape);
+      document.body.style.overflow = '';
+    };
+  }, [isMobileMenuOpen]);
+
+  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-lg border-b-2 border-gray-900/10 shadow-sm">
       <div className="max-w-7xl mx-auto px-6">
@@ -48,7 +67,7 @@ export default function Navbar() {
             <div className="flex items-center gap-1">
               <span className="text-xl font-bold font-mono text-gray-900 group-hover:text-blue-600 transition-colors">Swiftly</span>
               {/* <span className="text-xl font-bold text-gray-900">ly</span> */}
-              <span className="text-xs font-mono text-gray-400 ml-1">.nakshjoshi.in</span>
+              <span className="hidden sm:inline text-xs font-mono text-gray-400 ml-1">.nakshjoshi.in</span>
             </div>
           </Link>
 
@@ -75,7 +94,7 @@ export default function Navbar() {
           </div>
 
           {/* Action buttons with dev style */}
-          <div className="flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-3">
             {authUser ? (
               <Link
                 href="/dashboard"
@@ -119,8 +138,95 @@ export default function Navbar() {
               </>
             )}
           </div>
+
+          <button
+            type="button"
+            onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+            className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-lg border-2 border-gray-300 bg-white text-gray-900 hover:border-blue-500 hover:text-blue-600 transition-colors"
+            aria-label={isMobileMenuOpen ? 'close menu' : 'open menu'}
+            aria-expanded={isMobileMenuOpen}
+          >
+            {isMobileMenuOpen ? (
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
         </div>
       </div>
+
+      {isMobileMenuOpen ? (
+        <>
+          <button
+            type="button"
+            className="md:hidden fixed inset-0 top-16 bg-gray-900/20 backdrop-blur-[1px]"
+            onClick={closeMobileMenu}
+            aria-label="close mobile menu backdrop"
+          />
+          <div className="md:hidden border-t border-gray-200 bg-white/95 backdrop-blur-lg shadow-xl">
+            <div className="max-w-7xl mx-auto px-6 py-4 space-y-3">
+              <Link onClick={closeMobileMenu} href="/#how-it-works" className="block px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-mono text-sm">
+                howItWorks()
+              </Link>
+              <Link onClick={closeMobileMenu} href="/#features" className="block px-4 py-3 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors font-mono text-sm">
+                features()
+              </Link>
+              <Link onClick={closeMobileMenu} href="/#benefits" className="block px-4 py-3 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors font-mono text-sm">
+                benefits()
+              </Link>
+
+              {authUser ? (
+                <>
+                  <Link onClick={closeMobileMenu} href="/dashboard" className="block px-4 py-3 text-orange-700 hover:text-orange-800 hover:bg-orange-50 rounded-lg transition-colors font-mono text-sm border border-orange-200">
+                    dashboard()
+                  </Link>
+                  <Link
+                    onClick={closeMobileMenu}
+                    href="/dashboard"
+                    className="flex items-center gap-2 px-4 py-3 text-gray-700 hover:text-blue-700 transition-colors border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50"
+                  >
+                    {authUser.avatarUrl && !avatarLoadFailed ? (
+                      <img
+                        src={authUser.avatarUrl}
+                        alt={displayName}
+                        className="w-8 h-8 rounded-full border border-gray-200 object-cover"
+                        referrerPolicy="no-referrer"
+                        onError={() => setAvatarLoadFailed(true)}
+                      />
+                    ) : (
+                      <span className="w-8 h-8 rounded-full bg-gray-900 text-white font-mono text-xs inline-flex items-center justify-center">
+                        {displayName.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                    <span className="font-mono text-sm truncate">{displayName}</span>
+                  </Link>
+                </>
+              ) : (
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <Link
+                    onClick={closeMobileMenu}
+                    href="/signin"
+                    className="px-4 py-3 text-center text-gray-700 hover:text-blue-600 transition-colors font-mono text-sm border border-gray-200 rounded-lg hover:border-blue-600 hover:bg-blue-50"
+                  >
+                    signIn
+                  </Link>
+                  <Link
+                    onClick={closeMobileMenu}
+                    href="/signup"
+                    className="px-4 py-3 text-center bg-black text-white rounded-lg hover:bg-blue-600 transition-all font-mono text-sm border-2 border-black hover:border-blue-600"
+                  >
+                    start
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      ) : null}
       
       {/* Code-like decorative line */}
       <div className="absolute bottom-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-blue-500/20 to-transparent"></div>
