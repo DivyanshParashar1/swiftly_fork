@@ -259,7 +259,7 @@ export const authApi = {
   googleAuth: async (code:string): Promise<any> => {
 
     try {
-      const response = await apiClient.get(`api/v1/auth/google/callback?code=${code}`);
+      const response = await apiClient.get(`/api/v1/auth/google/callback?code=${code}`);
       return response;
     } catch (error) {
       handleAxiosError(error)

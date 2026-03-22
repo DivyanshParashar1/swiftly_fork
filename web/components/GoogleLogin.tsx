@@ -2,7 +2,9 @@
 
 import { authApi } from "@/lib/api";
 import { useGoogleLogin } from "@react-oauth/google";
-import { log } from "console";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useSnackbar } from "notistack";
 
 type GoogleLoginProps = {
 	mode?: 'signin' | 'signup';
@@ -10,20 +12,39 @@ type GoogleLoginProps = {
 };
 
 export default function GoogleLogin({ mode = 'signin', className = '' }: GoogleLoginProps) {
+    const router = useRouter();
+	const { enqueueSnackbar } = useSnackbar();
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        router.prefetch('/dashboard');
+    }, [router]);
 
 
+	const responseGoogle = async (result:any) =>{
+		if(!result?.code){
+			return
+		}
 
-
-    const responseGoogle = async (result:any) =>{
-        if(result?.code){
-            const response = await authApi.googleAuth(result.code);
-			console.log(response);
-        }
+		try {
+			setIsLoading(true)
+			await authApi.googleAuth(result.code)
+			enqueueSnackbar('Google login successful. Redirecting to dashboard...', { variant: 'success' })
+			router.replace('/dashboard')
+		} catch (error) {
+			enqueueSnackbar('Google login failed. Please try again.', { variant: 'error' })
+			console.error("Google auth failed", error)
+		} finally {
+			setIsLoading(false)
+		}
     }
 
     const googleLogin = useGoogleLogin({
         onSuccess: responseGoogle,
-        onError: responseGoogle,
+		onError: (error) => {
+			enqueueSnackbar('Google popup failed. Please retry.', { variant: 'error' })
+			console.error("Google login popup error", error)
+		},
         flow: 'auth-code'
     })
 
@@ -33,7 +54,8 @@ export default function GoogleLogin({ mode = 'signin', className = '' }: GoogleL
 	return (
 		<button
 			type="button"
-			className={`group relative w-full overflow-hidden rounded-2xl border border-gray-400/80 bg-white text-gray-900 shadow-[0_8px_24px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-500 hover:shadow-[0_18px_40px_rgba(37,99,235,0.18)] focus:outline-none focus:ring-2 focus:ring-blue-500/20 active:translate-y-0 ${className}`.trim()}
+			disabled={isLoading}
+			className={`group relative w-full overflow-hidden rounded-2xl border shadow-[0_8px_24px_rgba(15,23,42,0.06)] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 active:translate-y-0 ${isLoading ? 'border-yellow-600 bg-yellow-300 text-gray-950 shadow-[0_20px_40px_rgba(202,138,4,0.35)] cursor-not-allowed' : 'border-gray-400/80 bg-white text-gray-900 hover:-translate-y-0.5 hover:border-blue-500 hover:shadow-[0_18px_40px_rgba(37,99,235,0.18)]'} ${className}`.trim()}
 			aria-label={label}
             onClick={googleLogin}
 		>
@@ -51,10 +73,10 @@ export default function GoogleLogin({ mode = 'signin', className = '' }: GoogleL
 
 				<span className="flex min-w-0 flex-1 items-center justify-between gap-4">
 					<span className="truncate text-left font-mono text-base font-semibold tracking-tight text-gray-800">
-						{label}
+						{isLoading ? 'redirectingToDashboard()' : label}
 					</span>
 					<span className="text-sm font-mono text-gray-400 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-blue-600">
-						{'->'}
+						{isLoading ? '...' : '->'}
 					</span>
 				</span>
 			</span>
