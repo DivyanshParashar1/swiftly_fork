@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSnackbar } from 'notistack';
 import { ApiError, authApi, resumeApi, type ResumeRecord } from '@/lib/api';
+import { clearAuthUser } from '@/lib/authSession';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -22,6 +23,7 @@ export default function DashboardPage() {
       setResumes(response.data || []);
     } catch (error) {
       if (error instanceof ApiError && error.statusCode === 401) {
+        clearAuthUser();
         enqueueSnackbar('Please sign in to access dashboard', { variant: 'warning' });
         router.push('/signin');
         return;
@@ -45,6 +47,7 @@ export default function DashboardPage() {
     setIsLoggingOut(true);
     try {
       await authApi.logout();
+      clearAuthUser();
       enqueueSnackbar('Logged out successfully', { variant: 'success' });
       router.push('/signin');
     } catch (error) {
@@ -69,6 +72,7 @@ export default function DashboardPage() {
       enqueueSnackbar('Resume deleted successfully', { variant: 'success' });
     } catch (error) {
       if (error instanceof ApiError && error.statusCode === 401) {
+        clearAuthUser();
         enqueueSnackbar('Please sign in again', { variant: 'warning' });
         router.push('/signin');
         return;

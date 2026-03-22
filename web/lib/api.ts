@@ -24,6 +24,16 @@ export interface SignInData {
   provider: 'credentials';
 }
 
+export interface AuthUser {
+  id: string;
+  email: string;
+  fullName: string | null;
+  phone: string | null;
+  avatarUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ResumeRecord {
   id: string;
   title?: string | null;
@@ -256,29 +266,29 @@ function handleAxiosError(error: unknown): never {
 
 export const authApi = {
 
-  googleAuth: async (code:string): Promise<any> => {
+  googleAuth: async (code:string): Promise<ApiResponse<AuthUser>> => {
 
     try {
-      const response = await apiClient.get(`/api/v1/auth/google/callback?code=${code}`);
-      return response;
+      const response = await apiClient.get<ApiResponse<AuthUser>>(`/api/v1/auth/google/callback?code=${code}`);
+      return response.data;
     } catch (error) {
       handleAxiosError(error)
     }
   },
 
 
-  signUp: async (data: SignUpData): Promise<ApiResponse> => {
+  signUp: async (data: SignUpData): Promise<ApiResponse<AuthUser>> => {
     try {
-      const response = await apiClient.post<ApiResponse>('/api/v1/auth/signup', data);
+      const response = await apiClient.post<ApiResponse<AuthUser>>('/api/v1/auth/signup', data);
       return response.data;
     } catch (error) {
       handleAxiosError(error);
     }
   },
 
-  signIn: async (data: SignInData): Promise<ApiResponse> => {
+  signIn: async (data: SignInData): Promise<ApiResponse<AuthUser>> => {
     try {
-      const response = await apiClient.post<ApiResponse>('/api/v1/auth/signin', data);
+      const response = await apiClient.post<ApiResponse<AuthUser>>('/api/v1/auth/signin', data);
       return response.data;
     } catch (error) {
       handleAxiosError(error);
