@@ -66,8 +66,10 @@ export default function SignUpPage() {
         hashedPassword: formData.password,
         provider: 'credentials',
       });
+
+      const createdUser = response.data;
       
-      enqueueSnackbar(response.message || 'Account created successfully!', { variant: 'success' });
+      enqueueSnackbar(response.message || `Account created successfully for ${createdUser.fullName ?? createdUser.email}!`, { variant: 'success' });
       
       // Redirect to dashboard or home after successful signup
       setTimeout(() => {

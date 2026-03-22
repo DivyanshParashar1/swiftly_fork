@@ -28,8 +28,9 @@ export default function GoogleLogin({ mode = 'signin', className = '' }: GoogleL
 
 		try {
 			setIsLoading(true)
-			await authApi.googleAuth(result.code)
-			enqueueSnackbar('Google login successful. Redirecting to dashboard...', { variant: 'success' })
+			const response = await authApi.googleAuth(result.code)
+			const signedInUser = response.data
+			enqueueSnackbar(`Google login successful${signedInUser.fullName ? `, ${signedInUser.fullName}` : ''}. Redirecting to dashboard...`, { variant: 'success' })
 			router.replace('/dashboard')
 		} catch (error) {
 			enqueueSnackbar('Google login failed. Please try again.', { variant: 'error' })

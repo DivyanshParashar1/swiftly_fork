@@ -51,8 +51,10 @@ export default function SignInPage() {
         provider: 'credentials',
       });
 
+      const signedInUser = response.data;
+
       if(response.message ==="loggedIn"){
-        enqueueSnackbar('Logged in successfully', { variant: 'success' });
+        enqueueSnackbar(`Logged in successfully${signedInUser.fullName ? `, ${signedInUser.fullName}` : ''}`, { variant: 'success' });
       }
       
 
