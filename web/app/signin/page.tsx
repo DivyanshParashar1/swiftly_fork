@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useSnackbar } from 'notistack';
 import GoogleLogin from '@/components/GoogleLogin';
 import { authApi, ApiError, resumeApi } from '@/lib/api';
+import { setAuthUser } from '@/lib/authSession';
 
 export default function SignInPage() {
   const router = useRouter();
@@ -51,8 +52,11 @@ export default function SignInPage() {
         provider: 'credentials',
       });
 
+      const signedInUser = response.data;
+      setAuthUser(signedInUser);
+
       if(response.message ==="loggedIn"){
-        enqueueSnackbar('Logged in successfully', { variant: 'success' });
+        enqueueSnackbar(`Logged in successfully${signedInUser.fullName ? `, ${signedInUser.fullName}` : ''}`, { variant: 'success' });
       }
       
 
