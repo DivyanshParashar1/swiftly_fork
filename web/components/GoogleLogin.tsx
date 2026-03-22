@@ -5,6 +5,7 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSnackbar } from "notistack";
+import { setAuthUser } from "@/lib/authSession";
 
 type GoogleLoginProps = {
 	mode?: 'signin' | 'signup';
@@ -30,6 +31,7 @@ export default function GoogleLogin({ mode = 'signin', className = '' }: GoogleL
 			setIsLoading(true)
 			const response = await authApi.googleAuth(result.code)
 			const signedInUser = response.data
+			setAuthUser(signedInUser)
 			enqueueSnackbar(`Google login successful${signedInUser.fullName ? `, ${signedInUser.fullName}` : ''}. Redirecting to dashboard...`, { variant: 'success' })
 			router.replace('/dashboard')
 		} catch (error) {

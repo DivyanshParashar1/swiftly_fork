@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useSnackbar } from 'notistack';
 import GoogleLogin from '@/components/GoogleLogin';
 import { authApi, ApiError, resumeApi } from '@/lib/api';
+import { setAuthUser } from '@/lib/authSession';
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -68,6 +69,7 @@ export default function SignUpPage() {
       });
 
       const createdUser = response.data;
+      setAuthUser(createdUser);
       
       enqueueSnackbar(response.message || `Account created successfully for ${createdUser.fullName ?? createdUser.email}!`, { variant: 'success' });
       
