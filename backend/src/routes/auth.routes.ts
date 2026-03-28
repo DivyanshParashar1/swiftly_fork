@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { googleAuth, logout, signIn, signUp } from "../controllers/auth.controller";
+import { googleAuth, logout, signIn, signUp, refreshToken } from "../controllers/auth.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 
 
@@ -10,7 +10,7 @@ authRouter.route('/signin').post(signIn)
 authRouter.route('/google/callback/').get(googleAuth)
 
 
-
+authRouter.route('/refresh').post(refreshToken)
 authRouter.route('/logout').post(authMiddleware, logout)
 
 export default authRouter;

@@ -1,8 +1,7 @@
-import { log } from "node:console";
 import prisma from "../config/prisma";
 import type { createUserInput } from "../types/auth.types";
 import { ApiError } from "../utils/apiError.utils";
-import { hash, hashPassword, verifyHash, verifyPassword } from "../utils/bcrypt.utils";
+import { hash, hashPassword, verifyHash } from "../utils/bcrypt.utils";
 
 
 
@@ -21,6 +20,33 @@ export class AuthService{
             
         }
         
+    }
+
+    public async findSessionByUserIdAndToken(userId:string, token:string){
+        try {
+            const sessions = await prisma.session.findMany({
+                where:{userId:userId}
+            })
+
+            for (const session of sessions) {
+                const isValid = await verifyHash(token, session.refreshToken)
+                if (isValid) {
+                    return session
+                }
+            }
+
+            return null;
+        } catch (error) {
+            
+            throw new ApiError(404,"connection to DB failed")
+            
+        }
+    }
+
+    public async deleteSessionById(sessionId:string){
+        return await prisma.session.delete({
+            where:{id:sessionId}
+        })
     }
 
 
@@ -210,7 +236,7 @@ export class AuthService{
     public async saveRefreshToken(userId:string, token:string){
 
         const hashedToken = await hash(token)
-        const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        const expiresAt = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000)
 
         return await prisma.session.create({
             data:{
@@ -227,12 +253,12 @@ export class AuthService{
             where:{userId:userId}
         })
 
-        for(const i of sessions){
-            const isValid = await verifyHash(token, i.refreshToken)
+        for(const session of sessions){
+            const isValid = await verifyHash(token, session.refreshToken)
 
             if(isValid){
                 await prisma.session.delete({
-                    where:{id:i.id}
+                    where:{id:session.id}
                 })
             }
         }
@@ -251,4 +277,6 @@ export class AuthService{
             }
         })
     }
+
+
 }

@@ -48,14 +48,14 @@ const verifyAccessToken = (token: string): User | null => {
 
 const verifyRefreshToken = (token:string)=>{
 
-    try {
+    try {       
         const decoded = jwt.verify(token, refreshTokenSecret) as any
-    
-        if(decoded && decoded.userId ){
-            return generateAccessToken(decoded.id)
+        if(decoded && decoded.userId){
+            return decoded as User
         }
+        return null
     } catch (error) {
-        
+        return null
     }
 }
 

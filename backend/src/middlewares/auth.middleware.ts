@@ -31,7 +31,7 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
         next();
     } catch (error) {
 
-        throw new ApiError(401, "1 unauthorized request")
+        throw new ApiError(401, "Unauthorized Request")
         
     }
 }
