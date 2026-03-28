@@ -1,7 +1,9 @@
 import axios from 'axios';
+import type { InternalAxiosRequestConfig } from 'axios';
 
 // API configuration
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const rawApiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+export const API_BASE_URL = rawApiBaseUrl.replace(/\/+$/, '').replace(/\/api(?:\/v1)?$/, '');
 
 export interface ApiResponse<T = any> {
   statusCode: number;
@@ -9,6 +11,11 @@ export interface ApiResponse<T = any> {
   message: string;
   success: boolean;
 }
+
+type RefreshableRequestConfig = InternalAxiosRequestConfig & {
+  _retry?: boolean;
+  _skipAuthRefresh?: boolean;
+};
 
 export interface SignUpData {
   email: string;
@@ -250,6 +257,62 @@ const apiClient = axios.create({
   },
 });
 
+function toApiResponse<T>(payload: unknown, fallbackMessage = 'Success'): ApiResponse<T> {
+  if (
+    payload &&
+    typeof payload === 'object' &&
+    'statusCode' in payload &&
+    'data' in payload &&
+    'message' in payload &&
+    'success' in payload
+  ) {
+    return payload as ApiResponse<T>;
+  }
+
+  return {
+    statusCode: 200,
+    data: payload as T,
+    message: fallbackMessage,
+    success: true,
+  };
+}
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (!axios.isAxiosError(error)) {
+      return Promise.reject(error);
+    }
+
+    const originalRequest = error.config as RefreshableRequestConfig | undefined;
+    const statusCode = error.response?.status;
+
+    if (!originalRequest || statusCode !== 401 || originalRequest._retry || originalRequest._skipAuthRefresh) {
+      return Promise.reject(error);
+    }
+
+    const requestUrl = originalRequest.url || '';
+    const isAuthRoute =
+      requestUrl.includes('/api/v1/auth/signin') ||
+      requestUrl.includes('/api/v1/auth/signup') ||
+      requestUrl.includes('/api/v1/auth/google/callback') ||
+      requestUrl.includes('/api/v1/auth/refresh');
+
+    if (isAuthRoute) {
+      return Promise.reject(error);
+    }
+
+    originalRequest._retry = true;
+
+    try {
+      await apiClient.post('/api/v1/auth/refresh', undefined, { _skipAuthRefresh: true } as any);
+      return apiClient(originalRequest);
+    } catch (refreshError) {
+      return Promise.reject(refreshError);
+    }
+  }
+);
+
 function handleAxiosError(error: unknown): never {
   if (axios.isAxiosError(error)) {
     const message = error.response?.data?.message || error.message || 'Something went wrong';
@@ -270,7 +333,7 @@ export const authApi = {
 
     try {
       const response = await apiClient.get<ApiResponse<AuthUser>>(`/api/v1/auth/google/callback?code=${code}`);
-      return response.data;
+      return toApiResponse<AuthUser>(response.data, 'Google login successful');
     } catch (error) {
       handleAxiosError(error)
     }
@@ -280,7 +343,7 @@ export const authApi = {
   signUp: async (data: SignUpData): Promise<ApiResponse<AuthUser>> => {
     try {
       const response = await apiClient.post<ApiResponse<AuthUser>>('/api/v1/auth/signup', data);
-      return response.data;
+      return toApiResponse<AuthUser>(response.data, 'User registered successfully');
     } catch (error) {
       handleAxiosError(error);
     }
@@ -289,16 +352,27 @@ export const authApi = {
   signIn: async (data: SignInData): Promise<ApiResponse<AuthUser>> => {
     try {
       const response = await apiClient.post<ApiResponse<AuthUser>>('/api/v1/auth/signin', data);
-      return response.data;
+      return toApiResponse<AuthUser>(response.data, 'Logged in');
     } catch (error) {
       handleAxiosError(error);
     }
   },
 
-  logout: async (): Promise<ApiResponse> => {
+  refresh: async (): Promise<ApiResponse<null>> => {
     try {
-      const response = await apiClient.post<ApiResponse>('/api/v1/auth/logout');
-      return response.data;
+      const response = await apiClient.post<ApiResponse<null>>('/api/v1/auth/refresh', undefined, {
+        _skipAuthRefresh: true,
+      } as any);
+      return toApiResponse<null>(response.data, 'Token refreshed successfully');
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
+
+  logout: async (): Promise<ApiResponse<string | null>> => {
+    try {
+      const response = await apiClient.post('/api/v1/auth/logout');
+      return toApiResponse<string | null>(response.data, 'Logged out successfully');
     } catch (error) {
       handleAxiosError(error);
     }
@@ -309,7 +383,7 @@ export const resumeApi = {
   fetchResumeForUser: async (): Promise<ApiResponse<ResumeRecord[]>> => {
     try {
       const response = await apiClient.get<ApiResponse<ResumeRecord[]>>('/api/v1/fetch/fetchResumeForUser');
-      return response.data;
+      return toApiResponse<ResumeRecord[]>(response.data, 'Resume fetched successfully');
     } catch (error) {
       handleAxiosError(error);
     }
@@ -318,7 +392,7 @@ export const resumeApi = {
   fetchResumeById: async (resumeId: string): Promise<ApiResponse<ResumeDetailRecord>> => {
     try {
       const response = await apiClient.get<ApiResponse<ResumeDetailRecord>>(`/api/v1/fetch/fetchResumeById/${resumeId}`);
-      return response.data;
+      return toApiResponse<ResumeDetailRecord>(response.data, 'Resume fetched successfully');
     } catch (error) {
       handleAxiosError(error);
     }
@@ -327,7 +401,7 @@ export const resumeApi = {
   deleteResumeById: async (resumeId: string): Promise<ApiResponse<ResumeRecord>> => {
     try {
       const response = await apiClient.delete<ApiResponse<ResumeRecord>>(`/api/v1/fetch/deleteResumeById/${resumeId}`);
-      return response.data;
+      return toApiResponse<ResumeRecord>(response.data, 'Resume deleted successfully');
     } catch (error) {
       handleAxiosError(error);
     }
@@ -355,8 +429,8 @@ export const resumeApi = {
 export const updateApi = {
   updateResume: async (data: UpdateResumePayload): Promise<ApiResponse<ResumeRecord>> => {
     try {
-      const response = await apiClient.post<ApiResponse<ResumeRecord>>('/api/v1/update/updateResume', data);
-      return response.data;
+      const response = await apiClient.post('/api/v1/update/updateResume', data);
+      return toApiResponse<ResumeRecord>(response.data, 'Resume updated successfully');
     } catch (error) {
       handleAxiosError(error);
     }
@@ -364,8 +438,8 @@ export const updateApi = {
 
   updateEducation: async (data: UpdateEducationPayload): Promise<ApiResponse<EducationRecord>> => {
     try {
-      const response = await apiClient.post<ApiResponse<EducationRecord>>('/api/v1/update/updateEducation', data);
-      return response.data;
+      const response = await apiClient.post('/api/v1/update/updateEducation', data);
+      return toApiResponse<EducationRecord>(response.data, 'Education updated successfully');
     } catch (error) {
       handleAxiosError(error);
     }
@@ -373,8 +447,8 @@ export const updateApi = {
 
   updateExperience: async (data: UpdateExperiencePayload): Promise<ApiResponse<ExperienceRecord>> => {
     try {
-      const response = await apiClient.post<ApiResponse<ExperienceRecord>>('/api/v1/update/updateExperience', data);
-      return response.data;
+      const response = await apiClient.post('/api/v1/update/updateExperience', data);
+      return toApiResponse<ExperienceRecord>(response.data, 'Experience updated successfully');
     } catch (error) {
       handleAxiosError(error);
     }
@@ -382,8 +456,8 @@ export const updateApi = {
 
   updateProject: async (data: UpdateProjectPayload): Promise<ApiResponse<ProjectRecord>> => {
     try {
-      const response = await apiClient.post<ApiResponse<ProjectRecord>>('/api/v1/update/updateProjects', data);
-      return response.data;
+      const response = await apiClient.post('/api/v1/update/updateProjects', data);
+      return toApiResponse<ProjectRecord>(response.data, 'Project updated successfully');
     } catch (error) {
       handleAxiosError(error);
     }
@@ -391,8 +465,8 @@ export const updateApi = {
 
   updateSkill: async (data: UpdateSkillPayload): Promise<ApiResponse<SkillRecord>> => {
     try {
-      const response = await apiClient.post<ApiResponse<SkillRecord>>('/api/v1/update/updateSkills', data);
-      return response.data;
+      const response = await apiClient.post('/api/v1/update/updateSkills', data);
+      return toApiResponse<SkillRecord>(response.data, 'Skill updated successfully');
     } catch (error) {
       handleAxiosError(error);
     }
@@ -400,8 +474,8 @@ export const updateApi = {
 
   updateAchievement: async (data: UpdateAchievementPayload): Promise<ApiResponse<AchievementRecord>> => {
     try {
-      const response = await apiClient.post<ApiResponse<AchievementRecord>>('/api/v1/update/updateAchievements', data);
-      return response.data;
+      const response = await apiClient.post('/api/v1/update/updateAchievements', data);
+      return toApiResponse<AchievementRecord>(response.data, 'Achievement updated successfully');
     } catch (error) {
       handleAxiosError(error);
     }
@@ -409,8 +483,8 @@ export const updateApi = {
 
   updatePor: async (data: UpdatePorPayload): Promise<ApiResponse<PorRecord>> => {
     try {
-      const response = await apiClient.post<ApiResponse<PorRecord>>('/api/v1/update/updatePor', data);
-      return response.data;
+      const response = await apiClient.post('/api/v1/update/updatePor', data);
+      return toApiResponse<PorRecord>(response.data, 'POR updated successfully');
     } catch (error) {
       handleAxiosError(error);
     }
@@ -418,8 +492,8 @@ export const updateApi = {
 
   updatePublication: async (data: UpdatePublicationPayload): Promise<ApiResponse<PublicationRecord>> => {
     try {
-      const response = await apiClient.post<ApiResponse<PublicationRecord>>('/api/v1/update/updatePublications', data);
-      return response.data;
+      const response = await apiClient.post('/api/v1/update/updatePublications', data);
+      return toApiResponse<PublicationRecord>(response.data, 'Publication updated successfully');
     } catch (error) {
       handleAxiosError(error);
     }
