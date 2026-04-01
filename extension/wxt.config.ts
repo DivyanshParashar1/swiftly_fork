@@ -17,10 +17,5 @@ export default defineConfig({
       "<all_urls>"
     ],
   },
-  browser:{
-    firefox:{
-      profile:"dbfc8y0k.wxt-dev"
-    }
-  }
 
 });

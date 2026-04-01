@@ -12,7 +12,9 @@
     "zip": "wxt zip",
     "zip:firefox": "wxt zip -b firefox",
     "compile": "tsc --noEmit",
-    "postinstall": "wxt prepare"
+    "postinstall": "wxt prepare",
+    "chrome": "wxt",
+    "firefox": "FIREFOX_PROFILE=5syv7tup.wxt-dev wxt -b firefox"
   },
   "dependencies": {
     "@types/chrome": "^0.1.38",
