@@ -279,4 +279,9 @@ export class AuthService{
     }
 
 
+    public async getUserById(userId:string){
+        return await prisma.user.findUnique({
+            where:{id:userId}
+        })
+    }
 }
