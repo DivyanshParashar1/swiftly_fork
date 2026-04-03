@@ -17,10 +17,12 @@
     "firefox": "FIREFOX_PROFILE=5syv7tup.wxt-dev wxt -b firefox"
   },
   "dependencies": {
+    "@tailwindcss/postcss": "^4.2.2",
     "@types/chrome": "^0.1.38",
     "chrome": "^0.1.0",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "react-dom": "^19.2.4",
+    "tailwindcss": "^4.2.2"
   },
   "devDependencies": {
     "@types/react": "^19.2.14",
