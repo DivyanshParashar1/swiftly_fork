@@ -1,5 +1,9 @@
+import { getSelectedResumeRawJson } from "@/lib/selectedResumeStore";
+
 export default defineBackground(() => {
   console.log('Hello background!', { id: browser.runtime.id });
+
+  
 
   if(chrome.sidePanel){
     chrome.sidePanel

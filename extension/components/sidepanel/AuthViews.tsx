@@ -1,4 +1,5 @@
-import type { SessionState } from '@/lib/api';
+import { useMemo, useState } from 'react';
+import type { ResumeDetailRecord, SessionState } from '@/lib/api';
 import { PanelShell } from './PanelShell';
 
 interface LoadingViewProps {
@@ -81,11 +82,40 @@ interface SignedInViewProps {
   session: SessionState;
   onRefresh: () => void;
   onOpenDashboard: () => void;
+  onResumeSelect: (resumeId: string, resumeTitle: string) => void;
+  selectedResumeId: string | null;
+  selectedResumeTitle: string;
+  selectedResumeDetail: ResumeDetailRecord | null;
+  isDetailLoading: boolean;
+  detailError: string | null;
+  onRetryDetail: () => void;
 }
 
-export function SignedInView({ session, onRefresh, onOpenDashboard }: SignedInViewProps) {
+type DetailSectionKey =
+  | 'overview'
+  | 'education'
+  | 'experience'
+  | 'projects'
+  | 'skills'
+  | 'achievements'
+  | 'pors'
+  | 'publications';
+
+export function SignedInView({
+  session,
+  onRefresh,
+  onOpenDashboard,
+  onResumeSelect,
+  selectedResumeId,
+  selectedResumeTitle,
+  selectedResumeDetail,
+  isDetailLoading,
+  detailError,
+  onRetryDetail,
+}: SignedInViewProps) {
   const displayName = session.profile?.fullName?.trim() || session.profile?.email || 'Swiftly user';
   const avatarChar = displayName.charAt(0).toUpperCase();
+  const [activeSection, setActiveSection] = useState<DetailSectionKey>('overview');
 
   const getResumeLabel = (resume: SessionState['resumes'][number]) => {
     const fullName = [resume.firstName, resume.middleName, resume.lastName]
@@ -97,6 +127,90 @@ export function SignedInView({ session, onRefresh, onOpenDashboard }: SignedInVi
     if (fullName) return fullName;
     if (resume.resumeEmail?.trim()) return resume.resumeEmail.trim();
     return 'Untitled resume';
+  };
+
+  const sectionItems = useMemo(
+    () => [
+      { key: 'overview' as const, label: 'overview()' },
+      { key: 'education' as const, label: 'education[]' },
+      { key: 'experience' as const, label: 'experience[]' },
+      { key: 'projects' as const, label: 'projects[]' },
+      { key: 'skills' as const, label: 'skills[]' },
+      { key: 'achievements' as const, label: 'achievements[]' },
+      { key: 'pors' as const, label: 'pors[]' },
+      { key: 'publications' as const, label: 'publications[]' },
+    ],
+    [],
+  );
+
+  const renderDetailSection = () => {
+    if (!selectedResumeDetail) return null;
+
+    if (activeSection === 'overview') {
+      return (
+        <div className="space-y-1 text-xs text-slate-700">
+          <p><span className="font-semibold text-slate-900">Title:</span> {selectedResumeDetail.title || '-'}</p>
+          <p><span className="font-semibold text-slate-900">Name:</span> {[selectedResumeDetail.firstName, selectedResumeDetail.middleName, selectedResumeDetail.lastName].filter(Boolean).join(' ') || '-'}</p>
+          <p><span className="font-semibold text-slate-900">Email:</span> {selectedResumeDetail.resumeEmail || '-'}</p>
+          <p><span className="font-semibold text-slate-900">Phone:</span> {selectedResumeDetail.phoneNumber || '-'}</p>
+          <p><span className="font-semibold text-slate-900">Country:</span> {selectedResumeDetail.country || '-'}</p>
+          <p><span className="font-semibold text-slate-900">Summary:</span> {selectedResumeDetail.summary || '-'}</p>
+        </div>
+      );
+    }
+
+    const mapToLines = (lines: string[]) => (
+      <ul className="space-y-1 text-xs text-slate-700">
+        {lines.map((line, index) => (
+          <li key={`${line}-${index}`} className="rounded-md border border-slate-200 bg-white p-2">{line}</li>
+        ))}
+      </ul>
+    );
+
+    if (activeSection === 'education') {
+      if (selectedResumeDetail.education.length === 0) return <p className="text-xs text-slate-500">No education entries.</p>;
+      return mapToLines(
+        selectedResumeDetail.education.map((i) => `${i.instituteName || '-'} | ${i.degree || '-'} | ${i.startDate || '-'} to ${i.endDate || '-'}`),
+      );
+    }
+
+    if (activeSection === 'experience') {
+      if (selectedResumeDetail.experience.length === 0) return <p className="text-xs text-slate-500">No experience entries.</p>;
+      return mapToLines(
+        selectedResumeDetail.experience.map((i) => `${i.companyName || '-'} | ${i.position || '-'} | ${i.startDate || '-'} to ${i.endDate || '-'}`),
+      );
+    }
+
+    if (activeSection === 'projects') {
+      if (selectedResumeDetail.projects.length === 0) return <p className="text-xs text-slate-500">No project entries.</p>;
+      return mapToLines(
+        selectedResumeDetail.projects.map((i) => `${i.projectName || '-'} | ${(i.techStack || []).join(', ') || '-'}${i.githubLink ? ` | ${i.githubLink}` : ''}`),
+      );
+    }
+
+    if (activeSection === 'skills') {
+      if (selectedResumeDetail.skills.length === 0) return <p className="text-xs text-slate-500">No skill entries.</p>;
+      return mapToLines(selectedResumeDetail.skills.map((i) => `${i.name || '-'}${i.category ? ` | ${i.category}` : ''}`));
+    }
+
+    if (activeSection === 'achievements') {
+      if (selectedResumeDetail.achievements.length === 0) return <p className="text-xs text-slate-500">No achievement entries.</p>;
+      return mapToLines(
+        selectedResumeDetail.achievements.map((i) => `${i.title || '-'}${i.org ? ` | ${i.org}` : ''}${i.date ? ` | ${i.date}` : ''}`),
+      );
+    }
+
+    if (activeSection === 'pors') {
+      if (selectedResumeDetail.pors.length === 0) return <p className="text-xs text-slate-500">No position of responsibility entries.</p>;
+      return mapToLines(
+        selectedResumeDetail.pors.map((i) => `${i.title || '-'}${i.org ? ` | ${i.org}` : ''} | ${i.startDate || '-'} to ${i.endDate || '-'}`),
+      );
+    }
+
+    if (selectedResumeDetail.publications.length === 0) return <p className="text-xs text-slate-500">No publication entries.</p>;
+    return mapToLines(
+      selectedResumeDetail.publications.map((i) => `${i.title || '-'}${i.conference ? ` | ${i.conference}` : ''}${i.publicationDate ? ` | ${i.publicationDate}` : ''}`),
+    );
   };
 
   return (
@@ -145,16 +259,73 @@ export function SignedInView({ session, onRefresh, onOpenDashboard }: SignedInVi
           </div>
         ) : (
           session.resumes.slice(0, 6).map((resume) => (
-            <article key={resume.id} className="rounded-lg border border-slate-200 bg-white/90 p-2.5">
+            <button
+              key={resume.id}
+              type="button"
+              onClick={() => {
+                setActiveSection('overview');
+                onResumeSelect(resume.id, getResumeLabel(resume));
+              }}
+              className={`w-full cursor-pointer rounded-lg border bg-white/90 p-2.5 text-left transition ${selectedResumeId === resume.id ? 'border-blue-500 ring-1 ring-blue-200' : 'border-slate-200 hover:border-blue-300'}`}
+            >
               <p className="m-0 truncate text-sm font-semibold text-slate-800">{getResumeLabel(resume)}</p>
               <div className="mt-1 flex items-center gap-1.5 text-[11px] text-slate-500">
                 {resume.resumeEmail ? <span className="truncate">{resume.resumeEmail}</span> : null}
                 {resume.linkedIn ? <span className="rounded-full bg-blue-50 px-2 py-0.5 text-blue-700">has LinkedIn</span> : null}
               </div>
-            </article>
+            </button>
           ))
         )}
       </div>
+
+      {selectedResumeId ? (
+        <div className="mt-4 space-y-2">
+          <p className="m-0 text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">Resume details</p>
+          <div className="rounded-lg border border-slate-200 bg-white/95 p-2.5">
+            <div className="mb-2 rounded-md border border-blue-100 bg-blue-50 px-2 py-1.5">
+              <p className="m-0 text-[11px] font-semibold text-blue-700">selectedResume()</p>
+              <p className="m-0 mt-0.5 truncate text-xs text-slate-700">
+                <span className="font-semibold">title:</span> {selectedResumeTitle || '-'}
+              </p>
+              <p className="m-0 truncate text-xs text-slate-600">
+                <span className="font-semibold">id:</span> {selectedResumeId}
+              </p>
+            </div>
+            {isDetailLoading ? (
+              <p className="text-xs text-slate-500">Fetching selected resume details...</p>
+            ) : detailError ? (
+              <div className="space-y-2">
+                <p className="text-xs text-red-600">{detailError}</p>
+                <button
+                  type="button"
+                  onClick={onRetryDetail}
+                  className="cursor-pointer rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 hover:border-blue-500 hover:text-blue-700"
+                >
+                  retryFetch()
+                </button>
+              </div>
+            ) : selectedResumeDetail ? (
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-1">
+                  {sectionItems.map((item) => (
+                    <button
+                      key={item.key}
+                      type="button"
+                      onClick={() => setActiveSection(item.key)}
+                      className={`cursor-pointer rounded-full border px-2 py-1 text-[11px] font-semibold ${activeSection === item.key ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-slate-300 bg-white text-slate-700 hover:border-blue-400'}`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+                {renderDetailSection()}
+              </div>
+            ) : (
+              <p className="text-xs text-slate-500">Select a resume to view details.</p>
+            )}
+          </div>
+        </div>
+      ) : null}
     </PanelShell>
   );
 }

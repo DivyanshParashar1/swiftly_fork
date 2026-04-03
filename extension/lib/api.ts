@@ -11,8 +11,101 @@ export interface ResumeRecord {
 	firstName?: string | null;
 	middleName?: string | null;
 	lastName?: string | null;
+	country?: string | null;
 	resumeEmail?: string | null;
+	phoneNumber?: string | null;
 	linkedIn?: string | null;
+	github?: string | null;
+	personalPortfolio?: string | null;
+	leetCode?: string | null;
+	codingProfile2?: string | null;
+	codingProfile3?: string | null;
+	summary?: string | null;
+}
+
+export interface EducationRecord {
+	id: string;
+	resumeId: string;
+	instituteName?: string | null;
+	level?: string | null;
+	startDate?: string | null;
+	endDate?: string | null;
+	location?: string | null;
+	degree?: string | null;
+	branch?: string | null;
+	grade?: string | null;
+}
+
+export interface ExperienceRecord {
+	id: string;
+	resumeId: string;
+	companyName?: string | null;
+	location?: string | null;
+	type?: string | null;
+	startDate?: string | null;
+	endDate?: string | null;
+	position?: string | null;
+	description?: string | null;
+	proofLink?: string | null;
+}
+
+export interface ProjectRecord {
+	id: string;
+	resumeId: string;
+	projectName?: string | null;
+	techStack?: string[];
+	description?: string | null;
+	githubLink?: string | null;
+	liveLink?: string | null;
+	startDate?: string | null;
+	endDate?: string | null;
+}
+
+export interface SkillRecord {
+	id: string;
+	resumeId: string;
+	name?: string | null;
+	category?: string | null;
+}
+
+export interface AchievementRecord {
+	id: string;
+	resumeId: string;
+	title?: string | null;
+	org?: string | null;
+	date?: string | null;
+	description?: string | null;
+}
+
+export interface PorRecord {
+	id: string;
+	resumeId: string;
+	title?: string | null;
+	org?: string | null;
+	startDate?: string | null;
+	endDate?: string | null;
+	description?: string | null;
+}
+
+export interface PublicationRecord {
+	id: string;
+	resumeId: string;
+	authors?: string | null;
+	title?: string | null;
+	conference?: string | null;
+	place?: string | null;
+	publicationDate?: string | null;
+	description?: string | null;
+}
+
+export interface ResumeDetailRecord extends ResumeRecord {
+	education: EducationRecord[];
+	experience: ExperienceRecord[];
+	projects: ProjectRecord[];
+	skills: SkillRecord[];
+	achievements: AchievementRecord[];
+	pors: PorRecord[];
+	publications: PublicationRecord[];
 }
 
 export interface AuthProfile {
@@ -163,6 +256,23 @@ const inferProfileFromResumes = (resumes: ResumeRecord[]): AuthProfile | null =>
 	return { fullName: fullName || undefined, email: email || undefined };
 };
 
+const normalizeResumeDetail = (payload: unknown): ResumeDetailRecord | null => {
+	const raw = Array.isArray(payload) ? payload[0] : payload;
+	if (!raw || typeof raw !== 'object') return null;
+
+	const resume = raw as ResumeDetailRecord;
+	return {
+		...resume,
+		education: resume.education ?? [],
+		experience: resume.experience ?? [],
+		projects: resume.projects ?? [],
+		skills: resume.skills ?? [],
+		achievements: resume.achievements ?? [],
+		pors: resume.pors ?? [],
+		publications: resume.publications ?? [],
+	};
+};
+
 export const fetchResumeForUser = async (apiBaseUrl: string): Promise<{ status: number; resumes: ResumeRecord[] }> => {
 	const response = await fetchJson<ApiResponse<ResumeRecord[]>>(
 		`${apiBaseUrl}/api/v1/fetch/fetchResumeForUser`,
@@ -171,6 +281,21 @@ export const fetchResumeForUser = async (apiBaseUrl: string): Promise<{ status: 
 	return {
 		status: response.status,
 		resumes: response.data?.data ?? [],
+	};
+};
+
+export const fetchResumeById = async (
+	apiBaseUrl: string,
+	resumeId: string,
+): Promise<{ status: number; resume: ResumeDetailRecord | null; rawResumeJson: unknown }> => {
+	const response = await fetchJson<ApiResponse<unknown>>(
+		`${apiBaseUrl}/api/v1/fetch/fetchResumeById/${resumeId}`,
+	);
+
+	return {
+		status: response.status,
+		resume: normalizeResumeDetail(response.data?.data),
+		rawResumeJson: response.data?.data ?? null,
 	};
 };
 
