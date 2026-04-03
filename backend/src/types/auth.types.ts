@@ -29,7 +29,7 @@ export type SignIn ={
 
     email:string
     hashedPassword:string
-    provider:string
+    provider?:string
 
 }
 

@@ -4,9 +4,8 @@ import type { AuthRequest, createUserInput, SignIn } from "../types/auth.types";
 import { ApiError } from "../utils/apiError.utils";
 import { AuthService } from "../services/auth.service";
 import { ApiResponse } from "../utils/apiResponse.utils";
-import { generateAccessToken, generateRefreshToken } from "../utils/jwt.utils";
-import { hash, verifyPassword } from "../utils/bcrypt.utils";
-import cookieParser from "cookie-parser";
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../utils/jwt.utils";
+import { verifyHash, verifyPassword } from "../utils/bcrypt.utils";
 import { googleClientId, googleOAuth2Client } from "../utils/googleOauth2";
 import { log } from "node:console";
 
@@ -70,7 +69,7 @@ export const signIn = asyncHandler(async(req:Request, res: Response)=>{
     const userData: SignIn = {
         email: email.trim().toLowerCase(),
         hashedPassword: hashedPassword,
-        provider:provider
+        provider:provider || "credentials"
     }
 
     const user = await Auth.findUserbyEmail(userData.email)
@@ -79,7 +78,7 @@ export const signIn = asyncHandler(async(req:Request, res: Response)=>{
     if(!user){
         throw new ApiError(400, "user does not exist")
     }
-    const userAuthDetails = await Auth.getUserAuthAccount(user?.id as string, userData.provider )
+    const userAuthDetails = await Auth.getUserAuthAccount(user?.id as string, userData.provider || "credentials")
 
     if(!userAuthDetails){
         throw new ApiError(400, "password login not available for this user, please use your google account to login")
@@ -125,15 +124,16 @@ export const logout = asyncHandler(async(req:AuthRequest, res:Response)=>{
         path: "/"
     }
 
-    
-    const user = await Auth.deleteRefreshToken(userId, req.cookies.refreshToken)
+    if(req.cookies.refreshToken){
+        await Auth.deleteRefreshToken(userId, req.cookies.refreshToken)
+    }
 
 
     res
         .status(200)
         .clearCookie("accessToken", options)
         .clearCookie("refreshToken", options)
-        .json(`cookies cleared ${user}`)
+        .json(`cookies cleared for user`)
     
 
 
@@ -199,8 +199,68 @@ export const googleAuth = asyncHandler(async(req:AuthRequest, res:Response)=>{
 
 
 
+    }else{
+        throw new ApiError(400, "Google account email not verified")
     }
 
     
+
+})
+
+
+export const refreshToken = asyncHandler(async(req:AuthRequest, res:Response)=>{
+
+    const refreshTokenFromCookie = req.cookies.refreshToken
+    const refreshTokenFromHeader = req.header("Authorization")?.replace("Bearer ", "")
+
+    const refreshToken = refreshTokenFromCookie || refreshTokenFromHeader
+
+    if(!refreshToken){
+        throw new ApiError(401, "Refresh token not found, please login again")
+    }
+
+    const decoded = verifyRefreshToken(refreshToken)
+
+    if(!decoded){
+        throw new ApiError(401, "Invalid refresh token, please login again")
+    }
+
+    const userId = decoded.userId
+
+    const matchedSession = await Auth.findSessionByUserIdAndToken(userId, refreshToken)
+
+    if(!matchedSession){
+        throw new ApiError(401, "Session not found, please login again")
+    }
+
+    const isTokenValid = await verifyHash(refreshToken, matchedSession.refreshToken)
+
+    const options : CookieOptions= {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        domain: ".swiftly.nakshjoshi.in",
+    }
+
+    if(!isTokenValid){
+        throw new ApiError(401, "Invalid refresh token, please login again")
+    }
+
+    if(matchedSession.expiresAt < new Date()){
+        await Auth.deleteSessionById(matchedSession.id)
+        res.clearCookie("refreshToken", options).clearCookie("accessToken", options)
+        throw new ApiError(401, "Refresh token expired, please login again")
+    }
+
+    const accessToken = generateAccessToken(matchedSession.userId)
+    const newRefreshToken = generateRefreshToken(matchedSession.userId)
+
+    await Auth.deleteSessionById(matchedSession.id)
+    await Auth.saveRefreshToken(matchedSession.userId, newRefreshToken)
+
+    return res
+            .cookie("accessToken", accessToken,options)
+            .cookie("refreshToken", newRefreshToken, options)
+            .json(new ApiResponse(200, null , "Token refreshed successfully"))
 
 })
