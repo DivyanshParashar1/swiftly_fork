@@ -1,3 +1,5 @@
+import { makeHTMLElementObjForLLM } from "@/utils/makeHTMLElementObjForLLM";
+import { getAllFormInputFields } from '@/utils/domQuery';
 
 export default defineContentScript({
   matches: ['<all_urls>'],
@@ -21,11 +23,16 @@ export default defineContentScript({
       if (message?.type === 'AUTOFILL_FORM') {
         // console.log('AUTOFILL_FORM received in content script:', message?.resumeData);
 
-        const fields = getAllFormInputFields()
+        const fields = getAllFormInputFields();
+        const fieldData = fields.map((field) => makeHTMLElementObjForLLM(field));
+        console.log(fieldData);
         console.log(fields);
+        sendResponse({ ok: true, received: true, fieldCount: fieldData.length });
+        return;
 
-        
       }
+
+      sendResponse({ ok: false, received: false });
 
     });
   },

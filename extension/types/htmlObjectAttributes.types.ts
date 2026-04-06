@@ -14,8 +14,11 @@ export type HTMLObjectAttributes = {
         parentText: string | null,
         siblingIds: string | null,
         siblingTexts: string | null,
+        uncleIds?: string | null, // uncles are siblings of parents, so there can be multiple
+        uncleTexts?: string | null, // uncles are siblings of parents, so there can be multiple
         sectionHeading: string | null,
-        dataset: string | null,
+        dataset: Record<string, string> | null,
+
 
 
     }
