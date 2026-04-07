@@ -106,6 +106,74 @@ export default function App() {
     }
   };
 
+
+
+  const handleAutofillSelectedResume = async () => {
+    const selectedRawResume = getSelectedResumeRawJson();
+
+    if (!selectedResumeId || !selectedRawResume) {
+      setDetailError('Select a resume first to run autofill.');
+      return;
+    }
+
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+
+    if (!tab?.id) {
+      setDetailError('No active browser tab found for autofill.');
+      return;
+    }
+
+    const restrictedUrl = tab.url?.startsWith('chrome://')
+      || tab.url?.startsWith('chrome-extension://')
+      || tab.url?.startsWith('edge://')
+      || tab.url?.startsWith('about:');
+
+    if (restrictedUrl) {
+      setDetailError('Autofill is not available on browser internal pages. Open a job application page first.');
+      return;
+    }
+
+    const ensureContentScriptConnected = async (tabId: number): Promise<boolean> => {
+      try {
+        await chrome.tabs.sendMessage(tabId, { type: 'SWIFTLY_PING' });
+        return true;
+      } catch {
+        try {
+          await chrome.scripting.executeScript({
+            target: { tabId },
+            files: ['content-scripts/content.js'],
+          });
+          await chrome.tabs.sendMessage(tabId, { type: 'SWIFTLY_PING' });
+          return true;
+        } catch {
+          return false;
+        }
+      }
+    };
+
+    try {
+      const hasReceiver = await ensureContentScriptConnected(tab.id);
+      if (!hasReceiver) {
+        setDetailError('Could not connect to page script. Refresh target tab and try again.');
+        return;
+      }
+
+      const ack = await chrome.tabs.sendMessage(tab.id, {
+        type: 'AUTOFILL_FORM',
+        selectedResumeId,
+        resumeData: selectedRawResume,
+      });
+      console.log('AUTOFILL_FORM sent with selected resume:', selectedResumeId);
+      console.log('AUTOFILL_FORM ack from content script:', ack);
+    } catch (error) {
+      console.error('Failed sending AUTOFILL_FORM message:', error);
+      setDetailError('Could not send autofill command to page. Reload tab and try again.');
+    }
+  };
+
   if (screen.status === 'loading') {
     return (
       <LoadingView
@@ -147,6 +215,7 @@ export default function App() {
       selectedResumeDetail={selectedResumeDetail}
       isDetailLoading={isDetailLoading}
       detailError={detailError}
+      onAutofillSelectedResume={() => void handleAutofillSelectedResume()}
       onRetryDetail={() => {
         if (selectedResumeId) {
           void loadResumeDetail(session, selectedResumeId, selectedResumeTitle);

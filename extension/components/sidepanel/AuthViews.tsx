@@ -88,6 +88,7 @@ interface SignedInViewProps {
   selectedResumeDetail: ResumeDetailRecord | null;
   isDetailLoading: boolean;
   detailError: string | null;
+  onAutofillSelectedResume: () => void;
   onRetryDetail: () => void;
 }
 
@@ -111,6 +112,7 @@ export function SignedInView({
   selectedResumeDetail,
   isDetailLoading,
   detailError,
+  onAutofillSelectedResume,
   onRetryDetail,
 }: SignedInViewProps) {
   const displayName = session.profile?.fullName?.trim() || session.profile?.email || 'Swiftly user';
@@ -290,6 +292,13 @@ export function SignedInView({
               <p className="m-0 truncate text-xs text-slate-600">
                 <span className="font-semibold">id:</span> {selectedResumeId}
               </p>
+              <button
+                type="button"
+                onClick={onAutofillSelectedResume}
+                className="mt-2 cursor-pointer rounded-md bg-slate-900 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
+              >
+                autofill()
+              </button>
             </div>
             {isDetailLoading ? (
               <p className="text-xs text-slate-500">Fetching selected resume details...</p>
