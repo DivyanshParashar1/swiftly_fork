@@ -1,7 +1,47 @@
-import { getSelectedResumeRawJson } from "@/lib/selectedResumeStore";
+import { fetchAutofillMapping, resolveSessionState } from "@/lib/api";
+import type { HTMLObjectAttributes } from "@/types/htmlObjectAttributes.types";
 
 export default defineBackground(() => {
   console.log('Hello background!', { id: browser.runtime.id });
+
+  chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+    if (message?.type !== 'SWIFTLY_REQUEST_AUTOFILL_MAPPING') {
+      return;
+    }
+
+    const payload = message.payload as {
+      resumeData?: unknown;
+      htmlObjectData?: HTMLObjectAttributes[];
+    };
+
+    const run = async () => {
+      if (payload?.resumeData === undefined || payload?.resumeData === null) {
+        sendResponse({ ok: false, error: 'Missing resumeData payload.' });
+        return;
+      }
+
+      const session = await resolveSessionState();
+      if (!session.apiBaseUrl) {
+        sendResponse({ ok: false, error: 'API base URL not available. Please sign in again.' });
+        return;
+      }
+
+      const result = await fetchAutofillMapping(session.apiBaseUrl, {
+        resumeData: payload.resumeData,
+        htmlObjectData: payload.htmlObjectData ?? [],
+      });
+
+      if (result.status < 200 || result.status >= 300 || !result.aiResult) {
+        sendResponse({ ok: false, error: 'Autofill mapping request failed.' });
+        return;
+      }
+
+      sendResponse({ ok: true, aiResult: result.aiResult });
+    };
+
+    void run();
+    return true;
+  });
 
   
 

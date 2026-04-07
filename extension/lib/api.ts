@@ -1,3 +1,5 @@
+import type { HTMLObjectAttributes } from '@/types/htmlObjectAttributes.types';
+
 export interface ApiResponse<T = unknown> {
 	statusCode: number;
 	data: T;
@@ -123,6 +125,15 @@ export interface SessionState {
 	webBaseUrl: string;
 }
 
+export interface AutofillMappingPayload {
+	resumeData: unknown;
+	htmlObjectData: HTMLObjectAttributes[];
+}
+
+export interface AutofillMappingResponse {
+	aiResult: Record<string, unknown>;
+}
+
 const LOCAL_WEB_BASE_URL = 'http://localhost:3000';
 const PRODUCTION_WEB_BASE_URL = 'https://swiftly.nakshjoshi.in';
 
@@ -170,6 +181,29 @@ const fetchJson = async <T>(url: string): Promise<{ status: number; data: T | nu
 		headers: {
 			'Content-Type': 'application/json',
 		},
+	});
+
+	let parsedData: T | null = null;
+	try {
+		parsedData = (await response.json()) as T;
+	} catch {
+		parsedData = null;
+	}
+
+	return {
+		status: response.status,
+		data: parsedData,
+	};
+};
+
+const postJson = async <T>(url: string, body: unknown): Promise<{ status: number; data: T | null }> => {
+	const response = await fetch(url, {
+		method: 'POST',
+		credentials: 'include',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify(body),
 	});
 
 	let parsedData: T | null = null;
@@ -296,6 +330,21 @@ export const fetchResumeById = async (
 		status: response.status,
 		resume: normalizeResumeDetail(response.data?.data),
 		rawResumeJson: response.data?.data ?? null,
+	};
+};
+
+export const fetchAutofillMapping = async (
+	apiBaseUrl: string,
+	payload: AutofillMappingPayload,
+): Promise<{ status: number; aiResult: Record<string, unknown> | null }> => {
+	const response = await postJson<AutofillMappingResponse>(
+		`${apiBaseUrl}/api/v1/extension/getAutofillData`,
+		payload,
+	);
+
+	return {
+		status: response.status,
+		aiResult: response.data?.aiResult ?? null,
 	};
 };
 

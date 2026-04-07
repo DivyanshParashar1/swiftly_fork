@@ -11,6 +11,7 @@ export function makeHTMLElementObjForLLM(element:Element):HTMLObjectAttributes{
         inputMode: null,  //sorted
         label: null,  //sorted
         value: null,  //sorted
+        key:null,
 
         meta:{
 
@@ -31,10 +32,10 @@ export function makeHTMLElementObjForLLM(element:Element):HTMLObjectAttributes{
     objectForLLM.id = element.id || element.getAttribute('id') || null;
     objectForLLM.name = (element.getAttribute('name')) || null;
     objectForLLM.type = (element.getAttribute('type')) || null;
-    objectForLLM.tagName = element.tagName;
+    objectForLLM.tagName = element.tagName.toLowerCase();
     objectForLLM.placeholder = (element.getAttribute('placeholder')) || null;
     objectForLLM.inputMode = (element.getAttribute('inputmode')) || null;
-    objectForLLM.value = (element.getAttribute('value')) || null;
+    objectForLLM.value = (element as HTMLInputElement).value || (element.getAttribute('value')) || null;
 
     //now wee will use element[id] to find other values like label, parentText, siblingTexts etc.
 
@@ -55,8 +56,10 @@ export function makeHTMLElementObjForLLM(element:Element):HTMLObjectAttributes{
 }
 
 
-function getLabel(element: Element): string | null {
-  const el = element as HTMLElement
+function getLabel(element: Element | null): string | null {
+  if (!(element instanceof HTMLElement)) return null;
+
+  const el = element;
   const parts = new Set<string>()
 
   // label for id
@@ -146,15 +149,18 @@ function getSiblingIds(el:Element){
 function getSiblingTexts(el:Element){
   let returnValue:string | null = null;
 
-  const prevSiblingText = el.previousElementSibling?.textContent?.trim() || null;
-  const prevSiblingName = el.previousElementSibling?.getAttribute('name') || null;
-  const prevSiblingPlaceholder = el.previousElementSibling?.getAttribute('placeholder') || null;
-  const prevSiblingLabel = getLabel(el.previousElementSibling as Element);
+  const prevSibling = el.previousElementSibling;
+  const nextSibling = el.nextElementSibling;
 
-  const nextSiblingText = el.nextElementSibling?.textContent?.trim() || null;
-  const nextSiblingName = el.nextElementSibling?.getAttribute('name') || null;
-  const nextSiblingPlaceholder = el.nextElementSibling?.getAttribute('placeholder') || null;
-  const nextSiblingLabel = getLabel(el.nextElementSibling as Element);
+  const prevSiblingText = prevSibling?.textContent?.trim() || null;
+  const prevSiblingName = prevSibling?.getAttribute('name') || null;
+  const prevSiblingPlaceholder = prevSibling?.getAttribute('placeholder') || null;
+  const prevSiblingLabel = getLabel(prevSibling);
+
+  const nextSiblingText = nextSibling?.textContent?.trim() || null;
+  const nextSiblingName = nextSibling?.getAttribute('name') || null;
+  const nextSiblingPlaceholder = nextSibling?.getAttribute('placeholder') || null;
+  const nextSiblingLabel = getLabel(nextSibling);
   
   returnValue =
    `prevSibling: ${prevSiblingText ? 
@@ -185,15 +191,18 @@ function getUncleTexts(el:Element){
   let returnValue:string | null = null;
   
   const parent = el.parentElement;
-  const prevUncleText = parent?.previousElementSibling?.textContent?.trim() || null;
-  const prevUncleName = parent?.previousElementSibling?.getAttribute('name') || null;
-  const prevUnclePlaceholder = parent?.previousElementSibling?.getAttribute('placeholder') || null;
-  const prevUncleLabel = getLabel(parent?.previousElementSibling as Element);
+  const prevUncle = parent?.previousElementSibling ?? null;
+  const nextUncle = parent?.nextElementSibling ?? null;
 
-  const nextUncleText = parent?.nextElementSibling?.textContent?.trim() || null;
-  const nextUncleName = parent?.nextElementSibling?.getAttribute('name') || null;
-  const nextUnclePlaceholder = parent?.nextElementSibling?.getAttribute('placeholder') || null;
-  const nextUncleLabel = getLabel(parent?.nextElementSibling as Element);
+  const prevUncleText = prevUncle?.textContent?.trim() || null;
+  const prevUncleName = prevUncle?.getAttribute('name') || null;
+  const prevUnclePlaceholder = prevUncle?.getAttribute('placeholder') || null;
+  const prevUncleLabel = getLabel(prevUncle);
+
+  const nextUncleText = nextUncle?.textContent?.trim() || null;
+  const nextUncleName = nextUncle?.getAttribute('name') || null;
+  const nextUnclePlaceholder = nextUncle?.getAttribute('placeholder') || null;
+  const nextUncleLabel = getLabel(nextUncle);
   
   returnValue =
    `prevUncle: ${prevUncleText ? 

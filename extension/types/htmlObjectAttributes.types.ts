@@ -7,6 +7,7 @@ export type HTMLObjectAttributes = {
     inputMode: string | null,
     label: string | null,
     value?: string | null,
+    key: string|null, 
 
     meta:{
 
