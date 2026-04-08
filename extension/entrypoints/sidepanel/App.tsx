@@ -20,7 +20,7 @@ type ScreenState =
 
 type AutofillStage = 'idle' | 'sending' | 'processing' | 'autofilling' | 'done';
 
-const LOCAL_WEB_BASE_URL = 'http://localhost:3000';
+const PRODUCTION_WEB_BASE_URL = 'https://swiftly.nakshjoshi.in';
 
 export default function App() {
   const initialSelectedResume = getSelectedResumeSnapshot();
@@ -41,7 +41,7 @@ export default function App() {
       setScreen({ status: 'ready', session });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to load session.';
-      setScreen({ status: 'error', message, fallbackWebBaseUrl: LOCAL_WEB_BASE_URL });
+      setScreen({ status: 'error', message, fallbackWebBaseUrl: PRODUCTION_WEB_BASE_URL });
     }
   };
 
@@ -52,7 +52,7 @@ export default function App() {
   const webBaseUrl = useMemo(() => {
     if (screen.status === 'ready') return screen.session.webBaseUrl;
     if (screen.status === 'error') return screen.fallbackWebBaseUrl;
-    return LOCAL_WEB_BASE_URL;
+    return PRODUCTION_WEB_BASE_URL;
   }, [screen]);
 
   const openWebsite = async (path: '/signin' | '/signup' | '/dashboard') => {

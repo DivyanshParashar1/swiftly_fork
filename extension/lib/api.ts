@@ -134,13 +134,9 @@ export interface AutofillMappingResponse {
 	aiResult: Record<string, unknown>;
 }
 
-const LOCAL_WEB_BASE_URL = 'http://localhost:3000';
 const PRODUCTION_WEB_BASE_URL = 'https://swiftly.nakshjoshi.in';
 
-const LOCAL_API_BASE_URL = 'http://localhost:3001';
 const PRODUCTION_API_BASE_URL = 'https://api.swiftly.nakshjoshi.in';
-
-const API_BASE_CANDIDATES = [LOCAL_API_BASE_URL, PRODUCTION_API_BASE_URL];
 const EXTENSION_PROFILE_STORAGE_KEY = 'swiftly.extension.profile';
 
 const getCookiesByName = async (name: string): Promise<chrome.cookies.Cookie[]> => {
@@ -155,23 +151,6 @@ const getAuthCookies = async (): Promise<chrome.cookies.Cookie[]> => {
 	]);
 
 	return [...accessTokens, ...refreshTokens];
-};
-
-const detectPreferredEnv = (cookies: chrome.cookies.Cookie[]): 'local' | 'production' => {
-	const domains = cookies.map((cookie) => cookie.domain || '').join(' ');
-	if (domains.includes('swiftly.nakshjoshi.in')) return 'production';
-	return 'local';
-};
-
-const getWebBaseUrl = (env: 'local' | 'production'): string => {
-	return env === 'production' ? PRODUCTION_WEB_BASE_URL : LOCAL_WEB_BASE_URL;
-};
-
-const getApiCandidates = (env: 'local' | 'production'): string[] => {
-	if (env === 'production') {
-		return [PRODUCTION_API_BASE_URL, LOCAL_API_BASE_URL];
-	}
-	return [LOCAL_API_BASE_URL, PRODUCTION_API_BASE_URL];
 };
 
 const fetchJson = async <T>(url: string): Promise<{ status: number; data: T | null }> => {
@@ -350,8 +329,7 @@ export const fetchAutofillMapping = async (
 
 export const resolveSessionState = async (): Promise<SessionState> => {
 	const cookies = await getAuthCookies();
-	const env = detectPreferredEnv(cookies);
-	const webBaseUrl = getWebBaseUrl(env);
+	const webBaseUrl = PRODUCTION_WEB_BASE_URL;
 
 	if (cookies.length === 0) {
 		return {
@@ -364,7 +342,7 @@ export const resolveSessionState = async (): Promise<SessionState> => {
 		};
 	}
 
-	const apiCandidates = getApiCandidates(env);
+	const apiCandidates = [PRODUCTION_API_BASE_URL];
 	let sawUnauthorized = false;
 	const cachedProfile = await getStoredProfile();
 
