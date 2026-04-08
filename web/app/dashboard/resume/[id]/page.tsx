@@ -86,16 +86,18 @@ function EditableInput({
   value,
   onChange,
   placeholder,
+  inputType = 'text',
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  inputType?: React.HTMLInputTypeAttribute;
 }) {
   return (
     <label className="space-y-1 block">
       <span className={labelClass}>{label}</span>
-      <input className={inputClass} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
+      <input type={inputType} className={inputClass} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
     </label>
   );
 }
@@ -312,7 +314,12 @@ export default function ResumeDetailPage() {
           <EditableInput label="resumeEmail" value={draft.resumeEmail || ''} onChange={(v) => setDraftField('resumeEmail', v)} />
           <EditableInput label="phoneNumber" value={draft.phoneNumber || ''} onChange={(v) => setDraftField('phoneNumber', v)} />
           <EditableInput label="country" value={draft.country || ''} onChange={(v) => setDraftField('country', v)} />
-          <EditableInput label="dateOfBirth" value={draft.dateOfBirth || ''} onChange={(v) => setDraftField('dateOfBirth', v)} />
+          <EditableInput
+            label="dateOfBirth"
+            value={draft.dateOfBirth || ''}
+            onChange={(v) => setDraftField('dateOfBirth', v)}
+            inputType="date"
+          />
           <EditableInput label="yearOfGraduation" value={draft.yearOfGraduation || ''} onChange={(v) => setDraftField('yearOfGraduation', v)} />
           <EditableInput label="linkedIn" value={draft.linkedIn || ''} onChange={(v) => setDraftField('linkedIn', v)} />
           <EditableInput label="github" value={draft.github || ''} onChange={(v) => setDraftField('github', v)} />
