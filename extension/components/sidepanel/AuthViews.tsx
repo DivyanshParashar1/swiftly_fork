@@ -90,6 +90,9 @@ interface SignedInViewProps {
   detailError: string | null;
   onAutofillSelectedResume: () => void;
   onRetryDetail: () => void;
+  autofillButtonTone: 'blue' | 'yellow' | 'green';
+  autofillStatusText: string | null;
+  isAutofillRunning: boolean;
 }
 
 type DetailSectionKey =
@@ -114,6 +117,9 @@ export function SignedInView({
   detailError,
   onAutofillSelectedResume,
   onRetryDetail,
+  autofillButtonTone,
+  autofillStatusText,
+  isAutofillRunning,
 }: SignedInViewProps) {
   const displayName = session.profile?.fullName?.trim() || session.profile?.email || 'Swiftly user';
   const avatarChar = displayName.charAt(0).toUpperCase();
@@ -215,8 +221,31 @@ export function SignedInView({
     );
   };
 
+  const autofillButtonClass =
+    autofillButtonTone === 'yellow'
+      ? 'bg-amber-400 text-slate-950 hover:bg-amber-300'
+      : autofillButtonTone === 'green'
+        ? 'bg-emerald-500 text-white hover:bg-emerald-400'
+        : 'bg-blue-600 text-white hover:bg-blue-500';
+
   return (
-    <PanelShell>
+    <PanelShell
+      outside={selectedResumeId ? (
+        <div className="rounded-xl border border-slate-200/70 bg-white/85 p-2.5 shadow-md backdrop-blur">
+          <button
+            type="button"
+            onClick={onAutofillSelectedResume}
+            disabled={isAutofillRunning}
+            className={`w-full cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold transition ${autofillButtonClass} ${isAutofillRunning ? 'opacity-95' : ''}`}
+          >
+            autofill()
+          </button>
+          {autofillStatusText ? (
+            <p className="m-0 mt-2 text-xs text-slate-700">{autofillStatusText}</p>
+          ) : null}
+        </div>
+      ) : null}
+    >
       <p className="m-0 text-[11px] uppercase tracking-[0.09em] text-slate-500">swiftly.extension</p>
       <h1 className="mt-2 mb-2 text-2xl font-bold tracking-tight">Welcome back</h1>
 
@@ -292,13 +321,6 @@ export function SignedInView({
               <p className="m-0 truncate text-xs text-slate-600">
                 <span className="font-semibold">id:</span> {selectedResumeId}
               </p>
-              <button
-                type="button"
-                onClick={onAutofillSelectedResume}
-                className="mt-2 cursor-pointer rounded-md bg-slate-900 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
-              >
-                autofill()
-              </button>
             </div>
             {isDetailLoading ? (
               <p className="text-xs text-slate-500">Fetching selected resume details...</p>

@@ -18,6 +18,8 @@ type ScreenState =
   | { status: 'ready'; session: SessionState }
   | { status: 'error'; message: string; fallbackWebBaseUrl: string };
 
+type AutofillStage = 'idle' | 'sending' | 'processing' | 'autofilling' | 'done';
+
 const LOCAL_WEB_BASE_URL = 'http://localhost:3000';
 
 export default function App() {
@@ -29,6 +31,8 @@ export default function App() {
   const [selectedResumeDetail, setSelectedResumeDetail] = useState<ResumeDetailRecord | null>(initialSelectedResume?.detail || null);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
+  const [autofillStage, setAutofillStage] = useState<AutofillStage>('idle');
+  const [autofillStatusText, setAutofillStatusText] = useState<string | null>(null);
 
   const loadSession = async () => {
     setScreen({ status: 'loading' });
@@ -109,6 +113,10 @@ export default function App() {
 
 
   const handleAutofillSelectedResume = async () => {
+    if (autofillStage !== 'idle') {
+      return;
+    }
+
     const selectedRawResume = getSelectedResumeRawJson();
 
     if (!selectedResumeId || !selectedRawResume) {
@@ -155,24 +163,62 @@ export default function App() {
     };
 
     try {
+      setAutofillStage('sending');
+      setAutofillStatusText('Sending scrapping data...');
+
       const hasReceiver = await ensureContentScriptConnected(tab.id);
       if (!hasReceiver) {
+        setAutofillStage('idle');
+        setAutofillStatusText(null);
         setDetailError('Could not connect to page script. Refresh target tab and try again.');
         return;
       }
+
+      const phase1Timer = setTimeout(() => {
+        setAutofillStage('processing');
+        setAutofillStatusText('Processing job page...');
+      }, 900);
+
+      const phase2Timer = setTimeout(() => {
+        setAutofillStage('autofilling');
+        setAutofillStatusText('Autofilling data...');
+      }, 1800);
 
       const ack = await chrome.tabs.sendMessage(tab.id, {
         type: 'AUTOFILL_FORM',
         selectedResumeId,
         resumeData: selectedRawResume,
       });
+
+      clearTimeout(phase1Timer);
+      clearTimeout(phase2Timer);
+
       console.log('AUTOFILL_FORM sent with selected resume:', selectedResumeId);
       console.log('AUTOFILL_FORM ack from content script:', ack);
+
+      setAutofillStage('done');
+      setAutofillStatusText('Autofill complete.');
+
+      setTimeout(() => {
+        setAutofillStage('idle');
+        setAutofillStatusText(null);
+      }, 1200);
     } catch (error) {
       console.error('Failed sending AUTOFILL_FORM message:', error);
+      setAutofillStage('idle');
+      setAutofillStatusText(null);
       setDetailError('Could not send autofill command to page. Reload tab and try again.');
     }
   };
+
+  const autofillButtonTone: 'blue' | 'yellow' | 'green' =
+    autofillStage === 'sending'
+      ? 'blue'
+      : autofillStage === 'processing'
+        ? 'yellow'
+        : autofillStage === 'autofilling' || autofillStage === 'done'
+          ? 'green'
+          : 'blue';
 
   if (screen.status === 'loading') {
     return (
@@ -216,6 +262,9 @@ export default function App() {
       isDetailLoading={isDetailLoading}
       detailError={detailError}
       onAutofillSelectedResume={() => void handleAutofillSelectedResume()}
+      autofillButtonTone={autofillButtonTone}
+      autofillStatusText={autofillStatusText}
+      isAutofillRunning={autofillStage !== 'idle' && autofillStage !== 'done'}
       onRetryDetail={() => {
         if (selectedResumeId) {
           void loadResumeDetail(session, selectedResumeId, selectedResumeTitle);
