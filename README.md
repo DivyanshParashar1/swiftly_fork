@@ -317,7 +317,7 @@ Prerequisites:
 ### 1. Clone and enter project
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/nakshjoshi/swiftly
 cd swiftly
 ```
 
