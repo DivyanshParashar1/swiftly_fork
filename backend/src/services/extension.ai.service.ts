@@ -134,7 +134,7 @@ Return mapping for ALL keys. If unsure, return null.
       const prompt:string = this.promptBuilder(resumeData, htmlObjectData)
         
         const response = await gemini.models.generateContent({
-            model:'gemini-2.5-flash-lite',
+            model:'gemini-3.1-flash-lite',
             contents: prompt,
             config:{
                 responseMimeType: "application/json",
