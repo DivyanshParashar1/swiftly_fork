@@ -58,6 +58,8 @@ export default function SignInPage() {
       if(response.message ==="loggedIn"){
         enqueueSnackbar(`Logged in successfully${signedInUser.fullName ? `, ${signedInUser.fullName}` : ''}`, { variant: 'success' });
       }
+
+      window.postMessage({ type: 'USER_LOGGED_IN' }, '*');
       
 
       setTimeout(() => {

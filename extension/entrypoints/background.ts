@@ -5,6 +5,22 @@ export default defineBackground(() => {
   console.log('Hello background!', { id: browser.runtime.id });
 
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+    if (message?.type === 'USER_LOGGED_IN') {
+      chrome.runtime.sendMessage({ type: 'SWIFTLY_USER_LOGGED_IN' }).catch(() => {
+        return;
+      });
+      sendResponse({ ok: true, forwarded: true });
+      return;
+    }
+
+    if (message?.type === 'USER_LOGGED_OUT') {
+      chrome.runtime.sendMessage({ type: 'SWIFTLY_USER_LOGGED_OUT' }).catch(() => {
+        return;
+      });
+      sendResponse({ ok: true, forwarded: true });
+      return;
+    }
+
     if (message?.type !== 'SWIFTLY_REQUEST_AUTOFILL_MAPPING') {
       return;
     }

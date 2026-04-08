@@ -49,6 +49,20 @@ export default function App() {
     void loadSession();
   }, []);
 
+  useEffect(() => {
+    const handleRuntimeMessage = (message: unknown) => {
+      const payload = message as { type?: string };
+      if (payload?.type === 'SWIFTLY_USER_LOGGED_IN' || payload?.type === 'SWIFTLY_USER_LOGGED_OUT') {
+        void loadSession();
+      }
+    };
+
+    chrome.runtime.onMessage.addListener(handleRuntimeMessage);
+    return () => {
+      chrome.runtime.onMessage.removeListener(handleRuntimeMessage);
+    };
+  }, []);
+
   const webBaseUrl = useMemo(() => {
     if (screen.status === 'ready') return screen.session.webBaseUrl;
     if (screen.status === 'error') return screen.fallbackWebBaseUrl;

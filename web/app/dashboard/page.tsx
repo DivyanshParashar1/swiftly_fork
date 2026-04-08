@@ -48,6 +48,7 @@ export default function DashboardPage() {
     try {
       await authApi.logout();
       clearAuthUser();
+      window.postMessage({ type: 'USER_LOGGED_OUT' }, '*');
       enqueueSnackbar('Logged out successfully', { variant: 'success' });
       router.push('/signin');
     } catch (error) {

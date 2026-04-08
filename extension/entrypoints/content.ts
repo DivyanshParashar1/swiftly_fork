@@ -17,6 +17,16 @@ export default defineContentScript({
     }
     scopedWindow[guardKey] = true;
 
+    window.addEventListener('message', (event) => {
+      if (event.source !== window) return;
+      const messageType = event.data?.type;
+      if (messageType !== 'USER_LOGGED_IN' && messageType !== 'USER_LOGGED_OUT') return;
+
+      chrome.runtime.sendMessage({ type: messageType }).catch((error) => {
+        console.error(`Failed to forward ${messageType} message:`, error);
+      });
+    });
+
     chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       if (message?.type === 'SWIFTLY_PING') {
         sendResponse({ ok: true });
