@@ -27,11 +27,13 @@ export default function Hero() {
 
             <div className="flex flex-col sm:flex-row gap-4">
               <Link 
-                href="/signup" 
+                href="https://drive.google.com/drive/folders/1vvubNiNug3sqyMhbb1eL58K1h0DU4GUK?usp=sharing"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="px-8 py-4 bg-linear-to-r from-blue-600 to-blue-700 text-white text-lg font-medium rounded-full hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg shadow-blue-500/30 text-center group"
               >
                 <span className="flex items-center justify-center gap-2">
-                  Get Started
+                  Download Extension
                   <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
