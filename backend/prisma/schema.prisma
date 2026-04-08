@@ -24,11 +24,11 @@ enum ExperienceType {
 }
 
 model User {
-  id           String  @id @default(uuid())
-  email        String  @unique
-  fullName     String?
-  phone        String?
-  avatarUrl    String?
+  id        String  @id @default(uuid())
+  email     String  @unique
+  fullName  String?
+  phone     String?
+  avatarUrl String?
   // refreshToken String?
 
   createdAt DateTime @default(now())
@@ -77,6 +77,7 @@ model Resume {
   country           String?
   phoneNumber       String?
   resumeEmail       String?
+  dateOfBirth       String?
   linkedIn          String?
   github            String?
   personalPortfolio String?
@@ -84,6 +85,8 @@ model Resume {
   codingProfile2    String?
   codingProfile3    String?
   summary           String?
+  address           String?
+  yearOfGraduation  Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

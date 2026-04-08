@@ -50,6 +50,7 @@ export interface ResumeRecord {
   country?: string | null;
   resumeEmail?: string | null;
   phoneNumber?: string | null;
+  dateOfBirth?: string | null;
   linkedIn?: string | null;
   github?: string | null;
   personalPortfolio?: string | null;
@@ -57,6 +58,8 @@ export interface ResumeRecord {
   codingProfile2?: string | null;
   codingProfile3?: string | null;
   summary?: string | null;
+  address?: string | null;
+  yearOfGraduation?: number | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -155,6 +158,7 @@ export interface UpdateResumePayload {
   country?: string | null;
   phoneNumber?: string | null;
   resumeEmail?: string | null;
+  dateOfBirth?: string | null;
   linkedIn?: string | null;
   github?: string | null;
   personalPortfolio?: string | null;
@@ -162,6 +166,8 @@ export interface UpdateResumePayload {
   codingProfile2?: string | null;
   codingProfile3?: string | null;
   summary?: string | null;
+  address?: string | null;
+  yearOfGraduation?: number | null;
 }
 
 export interface UpdateEducationPayload {

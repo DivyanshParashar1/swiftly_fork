@@ -11,11 +11,11 @@ const profile = new ProfileUpdate()
 export const updateResumeForUser = asyncHandler(async (req:AuthRequest, res:Response)=>{
 
     const userId = req.userId!
-    const {title, firstName, middleName, lastName, country, phoneNumber, resumeEmail, linkedIn, github, personalPortfolio, leetCode, codingProfile2, codingProfile3, summary }:ResumeTable = req.body
+    const {title, firstName, middleName, lastName, country, phoneNumber, resumeEmail, linkedIn, github, personalPortfolio, leetCode, codingProfile2, codingProfile3, summary, dateOfBirth, yearOfGraduation, address }:ResumeTable = req.body
 
     const resumeId = req.body.id!
 
-    const result = await profile.updateResumeTable(userId, resumeId, {title, firstName, middleName, lastName, country, phoneNumber, resumeEmail, linkedIn, github, personalPortfolio, leetCode, codingProfile2, codingProfile3, summary})
+    const result = await profile.updateResumeTable(userId, resumeId, {title, firstName, middleName, lastName, country, phoneNumber, resumeEmail, linkedIn, github, personalPortfolio, leetCode, codingProfile2, codingProfile3, summary, dateOfBirth, yearOfGraduation, address})
 
     return res
         .status(200)

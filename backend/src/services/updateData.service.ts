@@ -6,7 +6,7 @@ import type { Education } from "../../generated/prisma/browser";
 export class ProfileUpdate{
     public async updateResumeTable(user:string, resume:string, data:ResumeTable){
 
-        const {title, firstName, middleName, lastName, country, phoneNumber, resumeEmail, linkedIn, github, personalPortfolio, leetCode, codingProfile2, codingProfile3, summary }= data
+        const {title, firstName, middleName, lastName, country, phoneNumber, resumeEmail, linkedIn, github, personalPortfolio, leetCode, codingProfile2, codingProfile3, summary, dateOfBirth, address, yearOfGraduation }= data
 
         const result = await prisma.resume.update({
 
@@ -28,8 +28,10 @@ export class ProfileUpdate{
                 ...(leetCode && {leetCode}),
                 ...(codingProfile2 && {codingProfile2}),
                 ...(codingProfile3 && {codingProfile3}),
-                ...(summary && {summary})
-
+                ...(summary && {summary}),
+                ...(dateOfBirth && {dateOfBirth}),
+                ...(address && {address}),
+                ...(yearOfGraduation && {yearOfGraduation})
             }
         })
 

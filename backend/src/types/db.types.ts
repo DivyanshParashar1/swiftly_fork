@@ -15,6 +15,10 @@ export type ResumeTable = {
     codingProfile2?: string | null;
     codingProfile3?: string | null;
     summary?: string | null;
+    dateOfBirth?: string | null;
+    address?: string | null;
+    yearOfGraduation?: number | null;
+
 };
 
 export type EducationTable = {

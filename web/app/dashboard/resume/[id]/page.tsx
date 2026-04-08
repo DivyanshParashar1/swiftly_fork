@@ -124,6 +124,14 @@ function cleanNullable(value: string): string | null {
   return trimmed === '' ? null : trimmed;
 }
 
+function cleanNullableNumber(value: string): number | null {
+  const trimmed = value.trim();
+  if (trimmed === '') return null;
+
+  const numeric = Number(trimmed);
+  return Number.isNaN(numeric) ? null : numeric;
+}
+
 export default function ResumeDetailPage() {
   const router = useRouter();
   const params = useParams();
@@ -256,6 +264,9 @@ export default function ResumeDetailPage() {
                     codingProfile2: resume.codingProfile2,
                     codingProfile3: resume.codingProfile3,
                     summary: resume.summary,
+                    dateOfBirth: resume.dateOfBirth,
+                    address: resume.address,
+                    yearOfGraduation: resume.yearOfGraduation,
                   })
                 }
                 className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 font-mono text-xs hover:border-blue-500 hover:text-blue-700 transition-colors"
@@ -270,12 +281,15 @@ export default function ResumeDetailPage() {
               <div><span className={labelClass}>resumeEmail</span><p>{resume.resumeEmail || '-'}</p></div>
               <div><span className={labelClass}>phoneNumber</span><p>{resume.phoneNumber || '-'}</p></div>
               <div><span className={labelClass}>country</span><p>{resume.country || '-'}</p></div>
+              <div><span className={labelClass}>dateOfBirth</span><p>{resume.dateOfBirth || '-'}</p></div>
+              <div><span className={labelClass}>yearOfGraduation</span><p>{resume.yearOfGraduation ?? '-'}</p></div>
               <div><span className={labelClass}>linkedIn</span><p className="break-all">{resume.linkedIn || '-'}</p></div>
               <div><span className={labelClass}>github</span><p className="break-all">{resume.github || '-'}</p></div>
               <div><span className={labelClass}>personalPortfolio</span><p className="break-all">{resume.personalPortfolio || '-'}</p></div>
               <div><span className={labelClass}>leetCode</span><p>{resume.leetCode || '-'}</p></div>
               <div><span className={labelClass}>codingProfile2</span><p>{resume.codingProfile2 || '-'}</p></div>
               <div><span className={labelClass}>codingProfile3</span><p>{resume.codingProfile3 || '-'}</p></div>
+              <div className="sm:col-span-2"><span className={labelClass}>address</span><p>{resume.address || '-'}</p></div>
             </div>
 
             <div>
@@ -298,12 +312,17 @@ export default function ResumeDetailPage() {
           <EditableInput label="resumeEmail" value={draft.resumeEmail || ''} onChange={(v) => setDraftField('resumeEmail', v)} />
           <EditableInput label="phoneNumber" value={draft.phoneNumber || ''} onChange={(v) => setDraftField('phoneNumber', v)} />
           <EditableInput label="country" value={draft.country || ''} onChange={(v) => setDraftField('country', v)} />
+          <EditableInput label="dateOfBirth" value={draft.dateOfBirth || ''} onChange={(v) => setDraftField('dateOfBirth', v)} />
+          <EditableInput label="yearOfGraduation" value={draft.yearOfGraduation || ''} onChange={(v) => setDraftField('yearOfGraduation', v)} />
           <EditableInput label="linkedIn" value={draft.linkedIn || ''} onChange={(v) => setDraftField('linkedIn', v)} />
           <EditableInput label="github" value={draft.github || ''} onChange={(v) => setDraftField('github', v)} />
           <EditableInput label="personalPortfolio" value={draft.personalPortfolio || ''} onChange={(v) => setDraftField('personalPortfolio', v)} />
           <EditableInput label="leetCode" value={draft.leetCode || ''} onChange={(v) => setDraftField('leetCode', v)} />
           <EditableInput label="codingProfile2" value={draft.codingProfile2 || ''} onChange={(v) => setDraftField('codingProfile2', v)} />
           <EditableInput label="codingProfile3" value={draft.codingProfile3 || ''} onChange={(v) => setDraftField('codingProfile3', v)} />
+          <div className="sm:col-span-2">
+            <EditableInput label="address" value={draft.address || ''} onChange={(v) => setDraftField('address', v)} />
+          </div>
         </div>
         <EditableTextarea label="summary" value={draft.summary || ''} onChange={(v) => setDraftField('summary', v)} />
         <div className="flex gap-2">
@@ -321,6 +340,7 @@ export default function ResumeDetailPage() {
                   country: cleanNullable(draft.country || ''),
                   phoneNumber: cleanNullable(draft.phoneNumber || ''),
                   resumeEmail: cleanNullable(draft.resumeEmail || ''),
+                  dateOfBirth: cleanNullable(draft.dateOfBirth || ''),
                   linkedIn: cleanNullable(draft.linkedIn || ''),
                   github: cleanNullable(draft.github || ''),
                   personalPortfolio: cleanNullable(draft.personalPortfolio || ''),
@@ -328,6 +348,8 @@ export default function ResumeDetailPage() {
                   codingProfile2: cleanNullable(draft.codingProfile2 || ''),
                   codingProfile3: cleanNullable(draft.codingProfile3 || ''),
                   summary: cleanNullable(draft.summary || ''),
+                  address: cleanNullable(draft.address || ''),
+                  yearOfGraduation: cleanNullableNumber(draft.yearOfGraduation || ''),
                 });
               })
             }
