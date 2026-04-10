@@ -43,7 +43,7 @@ model AuthAccount {
   id     String @id @default(uuid())
   userId String
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   provider     String
   providerId   String?
@@ -69,7 +69,7 @@ model Session {
 model Resume {
   id                String  @id @default(uuid())
   userId            String
-  user              User    @relation(fields: [userId], references: [id])
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   title             String? @default("Resume-1")
   firstName         String?
   middleName        String?
