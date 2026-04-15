@@ -197,7 +197,7 @@ RESUME TEXT: ${resumeData}
         const prompt:string = this.promptBuilder(resumeData)
         
         const response = await gemini.models.generateContent({
-            model:'gemini-3.1-flash-lite-preview',
+            model:'gemini-2.5-flash-lite',
             contents: prompt,
             config:{
                 responseMimeType: "application/json",
