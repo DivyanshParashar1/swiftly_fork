@@ -41,6 +41,8 @@ The platform solves a practical workflow:
 
 Swiftly is a cookie-authenticated client-server architecture with an extension client.
 
+![Swiftly system design diagram](docs/swiftlySD.svg)
+
 ### High-level components
 
 1. Browser (Web App)
@@ -287,7 +289,7 @@ All update routes are protected.
 The Prisma schema is normalized around `User` and `Resume`.
 
 **Normalized ER DB Design:**  
-![Normalized ER DB Design](swiftly-DB-Design_ER-Diagram.svg)
+![Normalized ER DB Design](docs/swiftly-DB-Design_ER-Diagram.svg)
 
 ### Main entities
 

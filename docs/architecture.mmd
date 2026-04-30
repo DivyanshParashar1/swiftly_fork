@@ -1,0 +1,81 @@
+graph TB
+    %% Simplified system diagram matching implemented code
+    %% Clients
+    subgraph "Clients"
+        U[👤 User]
+        Web[🌐 Web App (Next.js, React, TypeScript, Tailwind)]
+        Ext[📱 Browser Extension (WXT, React, TypeScript)]
+    end
+
+    %% Backend API
+    subgraph "Backend (Express API)"
+        API[API Server - Express (src/index.ts)<br/>Tech: Bun (dev), Express 5, TypeScript]
+        AuthR[Auth Routes (/api/v1/auth)<br/>Tech: JWT, cookies, google oauth handlers]
+        ResumeR[Resume Routes (/api/v1/resume)<br/>Tech: multer upload, pdf-parse, mammoth]
+        FetchR[Fetch Routes (/api/v1/fetch)<br/>Tech: Prisma reads]
+        UpdateR[Update Routes (/api/v1/update)<br/>Tech: Prisma writes]
+        ExtR[Extension Route (/api/v1/extension/getAutofillData)<br/>Tech: protected mapping endpoint]
+    end
+
+    %% AI providers and DB
+    subgraph "AI & Persistence"
+        Gemini[Google Gemini (via @google/genai) - parsing & mapping]
+        Groq[groq-sdk (optional) - alternate LLM path]
+        PG[PostgreSQL (prisma schema.prisma)]
+        Prisma[Prisma Client (generated) - @prisma/client]
+    end
+
+    %% Extension internals (implemented)
+    subgraph "Extension Runtime"
+        Content[Content Script (scans DOM, builds fields)<br/>utils/domQuery, makeHTMLElementObjForLLM]
+        Background[Background (forwards mapping requests)<br/>lib/api.ts -> fetchAutofillMapping]
+    end
+
+    %% Web internals (implemented)
+    subgraph "Web Runtime"
+        UploadPage[Upload page (calls /api/v1/resume/uploadAndParse)<br/>web/lib/api.ts]
+        Dashboard[Dashboard (fetches resumes via /api/v1/fetch)]
+    end
+
+    %% Flows
+    U -->|uses| Web
+    U -->|installs/uses| Ext
+
+    Web -->|POST /api/v1/resume/uploadAndParse (multer)| ResumeR
+    Web -->|GET/POST auth, fetch, update| AuthR
+    Web -->|GET resumes| FetchR
+
+    Ext -->|background sends mapping request| ExtR
+    Content -->|sends fields to background| Background
+    Background -->|POST /api/v1/extension/getAutofillData| ExtR
+
+    ResumeR -->|calls LLM| Gemini
+    ExtR -->|calls LLM| Gemini
+    ResumeR -->|writes/reads| Prisma
+    FetchR -->|reads| Prisma
+    UpdateR -->|writes| Prisma
+    Prisma -->|SQL| PG
+
+    %% Notes / security
+    classDef backend fill:#fff3e0,stroke:#f57c00
+    classDef db fill:#e8f5e8,stroke:#388e3c
+    classDef ai fill:#e1f5fe,stroke:#0277bd
+    classDef frontend fill:#e3f2fd,stroke:#1976d2
+    class Web,Ext frontend
+    class API,AuthR,ResumeR,FetchR,UpdateR,ExtR backend
+    class PG,Prisma db
+    class Gemini,Groq ai
+
+    %% Short workflow annotations
+    subgraph "Workflows (short)"
+        A1[1. Auth: Web signs user in → backend /api/v1/auth (JWT, cookies)]
+        A2[2. Upload: Web uploads resume → /api/v1/resume/uploadAndParse → LLM parse → Prisma store]
+        A3[3. Autofill: Extension content builds fields → background posts to /api/v1/extension/getAutofillData → LLM mapping → background returns mapping → content fills form]
+    end
+
+    Web --> A1
+    Web --> A2
+    Ext --> A3
+
+    click Gemini "https://cloud.google.com/genai" "Google Gemini"
+    click Groq "https://www.groq.ai/" "Groq SDK"
