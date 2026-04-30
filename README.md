@@ -286,6 +286,9 @@ All update routes are protected.
 
 The Prisma schema is normalized around `User` and `Resume`.
 
+**Normalized ER DB Design:**  
+![Normalized ER DB Design](swiftly-DB-Design_ER-Diagram.svg)
+
 ### Main entities
 
 1. `User`
