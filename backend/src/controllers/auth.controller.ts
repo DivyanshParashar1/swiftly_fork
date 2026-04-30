@@ -11,6 +11,13 @@ import { log } from "node:console";
 
 
 const Auth = new AuthService()
+const options : CookieOptions= {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        domain: ".swiftly.nakshjoshi.in",
+        path: "/",
+    }
 
 export const signUp = asyncHandler(async (req: Request, res: Response)=>{
 
@@ -38,14 +45,6 @@ export const signUp = asyncHandler(async (req: Request, res: Response)=>{
     const refreshToken = generateRefreshToken(createdUser!.id)
     
     await Auth.saveRefreshToken(createdUser!.id, refreshToken)
-
-    const options : CookieOptions= {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        domain: ".swiftly.nakshjoshi.in",
-        path: "/"
-    }
 
     return res
             .status(201)
@@ -86,14 +85,6 @@ export const signIn = asyncHandler(async(req:Request, res: Response)=>{
 
     const isPasswordValid = await verifyPassword(userData.hashedPassword, userAuthDetails?.passwordHash as string )
 
-    const options : CookieOptions= {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        domain: ".swiftly.nakshjoshi.in",
-        path: "/"
-    }
-
     if(isPasswordValid){
         const accessToken = generateAccessToken(user.id)
         const refreshToken = generateRefreshToken(user.id)
@@ -116,13 +107,6 @@ export const signIn = asyncHandler(async(req:Request, res: Response)=>{
 export const logout = asyncHandler(async(req:AuthRequest, res:Response)=>{
 
     const userId = req.userId
-    const options : CookieOptions= {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        domain: ".swiftly.nakshjoshi.in",
-        path: "/"
-    }
 
     if(req.cookies.refreshToken){
         await Auth.deleteRefreshToken(userId, req.cookies.refreshToken)
@@ -173,20 +157,12 @@ export const googleAuth = asyncHandler(async(req:AuthRequest, res:Response)=>{
         
         const user = await Auth.createUser(data)
 
-        log("This is the user returned from google auth",user)
+        // log("This is the user returned from google auth",user)
 
         const accessToken = generateAccessToken(user!.id)
         const refreshToken = generateRefreshToken(user!.id)
     
         await Auth.saveRefreshToken(user!.id, refreshToken)
-
-        const options : CookieOptions= {
-            httpOnly: true,
-            secure: true,
-            sameSite: "none",
-            domain: ".swiftly.nakshjoshi.in",
-            path: "/"
-        }
 
         return res
                 .status(201)

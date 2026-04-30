@@ -33,7 +33,7 @@ app.use('/api/v1/fetch', fetchRouter)
 app.use('/api/v1/extension', extensionRouter)
 
 app.get('/health', (req,res)=>{
-    res.send('Hello...I am under the water, here too much raining, vvvvvvvv.......')
+    res.send('Health Check Ok!')
 })
 
 app.listen(port, ()=>{
