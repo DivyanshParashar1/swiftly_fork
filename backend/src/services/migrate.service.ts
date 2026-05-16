@@ -153,17 +153,17 @@ function buildTemplateContext(resume: ResumeDetailRecord): Record<string, unknow
     summary: resume.summary,
     address: resume.address,
 
-    education: resume.education,
-    experience: resume.experience,
-    projects: resume.projects.map((p) => ({
+    education: resume.education || [],
+    experience: resume.experience || [],
+    projects: (resume.projects || []).map((p) => ({
       ...p,
       techStackStr: (p.techStack || []).join(', '),
     })),
-    skills: resume.skills,
-    achievements: resume.achievements,
-    pors: resume.pors,
-    publications: resume.publications,
-    skillCategories: groupSkills(resume.skills),
+    skills: resume.skills || [],
+    achievements: resume.achievements || [],
+    pors: resume.pors || [],
+    publications: resume.publications || [],
+    skillCategories: groupSkills(resume.skills || []),
   };
 
   return escapeObject(raw) as Record<string, unknown>;

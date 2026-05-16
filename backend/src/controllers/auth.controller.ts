@@ -16,7 +16,7 @@ const options: CookieOptions = {
     secure: true,
     // sameSite: "none",
     // domain: ".swiftly.nakshjoshi.in",
-    // path: "/",
+    path: "/",
 }
 
 export const signUp = asyncHandler(async (req: Request, res: Response) => {
@@ -214,8 +214,9 @@ export const refreshToken = asyncHandler(async (req: AuthRequest, res: Response)
     const options: CookieOptions = {
         httpOnly: true,
         secure: true,
-        sameSite: "none",
-        domain: ".swiftly.nakshjoshi.in",
+        // sameSite: "none",
+        // domain: ".swiftly.nakshjoshi.in",
+        path: "/",
     }
 
     if (!isTokenValid) {

@@ -1,0 +1,1 @@
+console.log('test2', process.env.TEST);
