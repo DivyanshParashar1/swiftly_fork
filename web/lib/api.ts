@@ -447,6 +447,37 @@ export const resumeApi = {
       handleAxiosError(error);
     }
   },
+
+  /**
+   * Requests a live preview PDF using raw JSON data.
+   */
+  previewResumePdf: async (resumeData: any, templateId: string = 'default'): Promise<Blob> => {
+    try {
+      const response = await apiClient.post(
+        `/api/v1/resume/preview?templateId=${templateId}`,
+        resumeData,
+        { responseType: 'blob' }
+      );
+      return response.data as Blob;
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
+
+  /**
+   * Updates the entire resume tree in one call.
+   */
+  updateFullResume: async (resumeId: string, fullData: any): Promise<any> => {
+    try {
+      const response = await apiClient.patch(
+        `/api/v1/resume/${resumeId}`,
+        fullData
+      );
+      return response.data;
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
 };
 
 export const updateApi = {
