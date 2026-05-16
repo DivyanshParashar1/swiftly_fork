@@ -1,0 +1,18 @@
+{
+  "templates": [
+    {
+      "id": "classic",
+      "name": "Classic",
+      "description": "Clean, traditional single-column layout. ATS-friendly and universally readable.",
+      "file": "src/config/templates/classic.tex",
+      "thumbnail": null
+    },
+    {
+      "id": "modern",
+      "name": "Modern",
+      "description": "Dark header with accent colors. Professional, contemporary look for tech roles.",
+      "file": "src/config/templates/modern.tex",
+      "thumbnail": null
+    }
+  ]
+}

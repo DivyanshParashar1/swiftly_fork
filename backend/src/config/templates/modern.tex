@@ -1,0 +1,148 @@
+%% Modern Resume Template — Swiftly LaTeX Migrate
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[left=0.65in, right=0.65in, top=0.6in, bottom=0.6in]{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{parskip}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{tabularx}
+
+\definecolor{headerBg}{HTML}{0f172a}
+\definecolor{accent}{HTML}{6366f1}
+\definecolor{muted}{HTML}{64748b}
+\definecolor{bodyText}{HTML}{1e293b}
+
+\hypersetup{colorlinks=true, urlcolor=accent, linkcolor=white}
+\color{bodyText}
+
+\titleformat{\section}{\bfseries\large\color{headerBg}}{}{0em}{}[{\color{accent}\rule{\linewidth}{1.5pt}}\vspace{2pt}]
+\titlespacing{\section}{0pt}{10pt}{4pt}
+\pagestyle{empty}
+\newcommand{\resumeItem}[1]{\item\small{#1}}
+\newcommand{\link}[2]{\href{#1}{#2}}
+
+\begin{document}
+
+% ─── HEADER ────────────────────────────────────────────────────────────────
+\colorbox{headerBg}{%
+  \parbox{\dimexpr\linewidth-2\fboxsep}{%
+    \centering\vspace{8pt}
+    {\color{white}\huge\bfseries
+      {{firstName}}{{#if middleName}} {{middleName}}{{/if}}{{#if lastName}} {{lastName}}{{/if}}
+    }\\[4pt]
+    {\color{accent}\small
+      {{#if resumeEmail}}\link{mailto:{{resumeEmail}} }{ {{resumeEmail}} }{{/if}}%
+      {{#if phoneNumber}}\ $\cdot$\ \textcolor{white}{ {{phoneNumber}} }{{/if}}%
+      {{#if country}}\ $\cdot$\ \textcolor{white}{ {{country}} }{{/if}}%
+    }\\[3pt]
+    {\color{white}\small
+      {{#if linkedIn}}\link{ {{linkedIn}} }{LinkedIn}{{/if}}%
+      {{#if github}}\ $|$\ \link{ {{github}} }{GitHub}{{/if}}%
+      {{#if personalPortfolio}}\ $|$\ \link{ {{personalPortfolio}} }{Portfolio}{{/if}}%
+    }
+    \vspace{8pt}
+  }%
+}
+
+% ─── SUMMARY ───────────────────────────────────────────────────────────────
+{{#if summary}}
+\section{Profile}
+\small{}{{summary}}
+{{/if}}
+
+% ─── EXPERIENCE ────────────────────────────────────────────────────────────
+{{#if experience}}
+\section{Experience}
+\begin{itemize}[leftmargin=0pt, label={}, topsep=0pt, itemsep=6pt]
+{{#each experience}}
+  \item
+    \begin{tabularx}{\linewidth}{@{}Xr@{}}
+      \textbf{ {{companyName}} } & \textcolor{muted}{\small{}{{startDate}}{{#if endDate}} -- {{endDate}}{{else}} -- Present{{/if}} }\\
+      \textit{\textcolor{accent}{ {{position}} } }{{#if location}} $\cdot$ \textcolor{muted}{\small{}{{location}} }{{/if}} & \\
+    \end{tabularx}
+    \begin{itemize}[leftmargin=12pt, topsep=2pt, itemsep=1pt]
+      \resumeItem{\small{}{{description}} }
+    \end{itemize}
+{{/each}}
+\end{itemize}
+{{/if}}
+
+% ─── EDUCATION ─────────────────────────────────────────────────────────────
+{{#if education}}
+\section{Education}
+\begin{itemize}[leftmargin=0pt, label={}, topsep=0pt, itemsep=4pt]
+{{#each education}}
+  \item
+    \begin{tabularx}{\linewidth}{@{}Xr@{}}
+      \textbf{ {{instituteName}} } & \textcolor{muted}{\small{}{{startDate}}{{#if endDate}} -- {{endDate}}{{/if}} }\\
+      \textit{ {{degree}}{{#if branch}}, {{branch}}{{/if}} }{{#if grade}} $\cdot$ Grade: {{grade}}{{/if}} & {{#if location}}\textcolor{muted}{\small{}{{location}} }{{/if}}\\
+    \end{tabularx}
+{{/each}}
+\end{itemize}
+{{/if}}
+
+% ─── PROJECTS ──────────────────────────────────────────────────────────────
+{{#if projects}}
+\section{Projects}
+\begin{itemize}[leftmargin=0pt, label={}, topsep=0pt, itemsep=6pt]
+{{#each projects}}
+  \item
+    \textbf{\textcolor{bodyText}{ {{projectName}} } }%
+    {{#if githubLink}}\ \link{ {{githubLink}} }{\small{}\textcolor{accent}{[GitHub]} }{{/if}}%
+    {{#if liveLink}}\ \link{ {{liveLink}} }{\small{}\textcolor{accent}{[Live]} }{{/if}}%
+    \hfill \textcolor{muted}{\small{}{{startDate}}{{#if endDate}} -- {{endDate}}{{/if}} }\\
+    {{#if techStackStr}}\textcolor{muted}{\small{}{{techStackStr}} }\\{{/if}}
+    \small{}{{description}}
+{{/each}}
+\end{itemize}
+{{/if}}
+
+% ─── SKILLS ────────────────────────────────────────────────────────────────
+{{#if skillCategories}}
+\section{Technical Skills}
+\begin{itemize}[leftmargin=0pt, label={}, topsep=0pt, itemsep=2pt]
+{{#each skillCategories}}
+  \item \small{}\textbf{ {{category}} :} {{skills}}
+{{/each}}
+\end{itemize}
+{{/if}}
+
+% ─── ACHIEVEMENTS ──────────────────────────────────────────────────────────
+{{#if achievements}}
+\section{Achievements}
+\begin{itemize}[leftmargin=12pt, topsep=0pt, itemsep=2pt]
+{{#each achievements}}
+  \resumeItem{\small{}\textbf{ {{title}} }{{#if org}} -- {{org}}{{/if}}{{#if date}} ({{date}}){{/if}}{{#if description}}: {{description}}{{/if}} }
+{{/each}}
+\end{itemize}
+{{/if}}
+
+% ─── POSITIONS OF RESPONSIBILITY ───────────────────────────────────────────
+{{#if pors}}
+\section{Positions of Responsibility}
+\begin{itemize}[leftmargin=0pt, label={}, topsep=0pt, itemsep=4pt]
+{{#each pors}}
+  \item
+    \textbf{ {{title}} }{{#if org}}, \textit{ {{org}} }{{/if}}
+    \hfill \textcolor{muted}{\small{}{{startDate}}{{#if endDate}} -- {{endDate}}{{/if}} }\\
+    {{#if description}}\small{}{{description}}{{/if}}
+{{/each}}
+\end{itemize}
+{{/if}}
+
+% ─── PUBLICATIONS ──────────────────────────────────────────────────────────
+{{#if publications}}
+\section{Publications}
+\begin{itemize}[leftmargin=12pt, topsep=0pt, itemsep=2pt]
+{{#each publications}}
+  \resumeItem{\small{}\textbf{ {{title}} }{{#if authors}}, {{authors}}{{/if}}{{#if conference}}, \textit{ {{conference}} }{{/if}}{{#if publicationDate}} ({{publicationDate}}){{/if}} }
+{{/each}}
+\end{itemize}
+{{/if}}
+
+\end{document}

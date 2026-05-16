@@ -11,22 +11,22 @@ import { log } from "node:console";
 
 
 const Auth = new AuthService()
-const options : CookieOptions= {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        domain: ".swiftly.nakshjoshi.in",
-        path: "/",
-    }
+const options: CookieOptions = {
+    httpOnly: true,
+    secure: true,
+    // sameSite: "none",
+    // domain: ".swiftly.nakshjoshi.in",
+    // path: "/",
+}
 
-export const signUp = asyncHandler(async (req: Request, res: Response)=>{
+export const signUp = asyncHandler(async (req: Request, res: Response) => {
 
     console.log(req.body)
 
-    const {email, fullName, phone, provider, providerId, hashedPassword}:createUserInput = req.body
+    const { email, fullName, phone, provider, providerId, hashedPassword }: createUserInput = req.body
 
-    if (!email?.trim() || !fullName?.trim() || (!hashedPassword?.trim() && !providerId?.trim())){
-        throw new ApiError(400, "Please fill mandatory field")  
+    if (!email?.trim() || !fullName?.trim() || (!hashedPassword?.trim() && !providerId?.trim())) {
+        throw new ApiError(400, "Please fill mandatory field")
     }
 
 
@@ -34,81 +34,81 @@ export const signUp = asyncHandler(async (req: Request, res: Response)=>{
         email: email.trim().toLowerCase(),
         fullName,
         phone,
-        provider, 
+        provider,
         providerId,
         hashedPassword,
     } as createUserInput
 
-    
+
     const createdUser = await Auth.createUser(data)
     const accessToken = generateAccessToken(createdUser!.id)
     const refreshToken = generateRefreshToken(createdUser!.id)
-    
+
     await Auth.saveRefreshToken(createdUser!.id, refreshToken)
 
     return res
-            .status(201)
-            .cookie("accessToken", accessToken,options)
-            .cookie("refreshToken", refreshToken, options)
-            .json(new ApiResponse(201, createdUser, "User registered successfully"))
+        .status(201)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(new ApiResponse(201, createdUser, "User registered successfully"))
 
 })
 
 
-export const signIn = asyncHandler(async(req:Request, res: Response)=>{
+export const signIn = asyncHandler(async (req: Request, res: Response) => {
 
     // console.log(req.body)
 
-    const {email, hashedPassword, provider}:SignIn = req.body
+    const { email, hashedPassword, provider }: SignIn = req.body
 
-    if(!email?.trim() || !hashedPassword?.trim()){
+    if (!email?.trim() || !hashedPassword?.trim()) {
         throw new ApiError(400, "Email and Password are required")
     }
 
     const userData: SignIn = {
         email: email.trim().toLowerCase(),
         hashedPassword: hashedPassword,
-        provider:provider || "credentials"
+        provider: provider || "credentials"
     }
 
     const user = await Auth.findUserbyEmail(userData.email)
-    
 
-    if(!user){
+
+    if (!user) {
         throw new ApiError(400, "user does not exist")
     }
     const userAuthDetails = await Auth.getUserAuthAccount(user?.id as string, userData.provider || "credentials")
 
-    if(!userAuthDetails){
+    if (!userAuthDetails) {
         throw new ApiError(400, "password login not available for this user, please use your google account to login")
     }
 
-    const isPasswordValid = await verifyPassword(userData.hashedPassword, userAuthDetails?.passwordHash as string )
+    const isPasswordValid = await verifyPassword(userData.hashedPassword, userAuthDetails?.passwordHash as string)
 
-    if(isPasswordValid){
+    if (isPasswordValid) {
         const accessToken = generateAccessToken(user.id)
         const refreshToken = generateRefreshToken(user.id)
         await Auth.saveRefreshToken(user.id, refreshToken)
 
         res
-            .cookie("accessToken", accessToken,options)
+            .cookie("accessToken", accessToken, options)
             .cookie("refreshToken", refreshToken, options)
-            .json(new ApiResponse(201,user,"loggedIn"))
+            .json(new ApiResponse(201, user, "loggedIn"))
 
     }
 
-    if(!isPasswordValid){
+    if (!isPasswordValid) {
         throw new ApiError(401, "Wrong Password")
     }
-    
+
 })
 
 
-export const logout = asyncHandler(async(req:AuthRequest, res:Response)=>{
+export const logout = asyncHandler(async (req: AuthRequest, res: Response) => {
 
     const userId = req.userId
 
-    if(req.cookies.refreshToken){
+    if (req.cookies.refreshToken) {
         await Auth.deleteRefreshToken(userId, req.cookies.refreshToken)
     }
 
@@ -118,14 +118,14 @@ export const logout = asyncHandler(async(req:AuthRequest, res:Response)=>{
         .clearCookie("accessToken", options)
         .clearCookie("refreshToken", options)
         .json(`cookies cleared for user`)
-    
+
 
 
 
 })
 
 
-export const googleAuth = asyncHandler(async(req:AuthRequest, res:Response)=>{
+export const googleAuth = asyncHandler(async (req: AuthRequest, res: Response) => {
 
     const googleCode = req.query.code
 
@@ -138,8 +138,8 @@ export const googleAuth = asyncHandler(async(req:AuthRequest, res:Response)=>{
     })
 
     const payload = ticket.getPayload()
-    
-    if(payload?.email_verified){
+
+    if (payload?.email_verified) {
         const email = payload.email
         const fullName = payload.name
         const providerId = payload.sub
@@ -152,52 +152,52 @@ export const googleAuth = asyncHandler(async(req:AuthRequest, res:Response)=>{
             provider: "google",
             providerId: providerId,
             avatar: avatar
-        }as createUserInput
+        } as createUserInput
 
-        
+
         const user = await Auth.createUser(data)
 
         // log("This is the user returned from google auth",user)
 
         const accessToken = generateAccessToken(user!.id)
         const refreshToken = generateRefreshToken(user!.id)
-    
+
         await Auth.saveRefreshToken(user!.id, refreshToken)
 
         return res
-                .status(201)
-                .cookie("accessToken", accessToken,options)
-                .cookie("refreshToken", refreshToken, options)
-                .json(new ApiResponse(201, user, "User registered successfully"))
+            .status(201)
+            .cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", refreshToken, options)
+            .json(new ApiResponse(201, user, "User registered successfully"))
 
 
 
 
 
 
-    }else{
+    } else {
         throw new ApiError(400, "Google account email not verified")
     }
 
-    
+
 
 })
 
 
-export const refreshToken = asyncHandler(async(req:AuthRequest, res:Response)=>{
+export const refreshToken = asyncHandler(async (req: AuthRequest, res: Response) => {
 
     const refreshTokenFromCookie = req.cookies.refreshToken
     const refreshTokenFromHeader = req.header("Authorization")?.replace("Bearer ", "")
 
     const refreshToken = refreshTokenFromCookie || refreshTokenFromHeader
 
-    if(!refreshToken){
+    if (!refreshToken) {
         throw new ApiError(401, "Refresh token not found, please login again")
     }
 
     const decoded = verifyRefreshToken(refreshToken)
 
-    if(!decoded){
+    if (!decoded) {
         throw new ApiError(401, "Invalid refresh token, please login again")
     }
 
@@ -205,24 +205,24 @@ export const refreshToken = asyncHandler(async(req:AuthRequest, res:Response)=>{
 
     const matchedSession = await Auth.findSessionByUserIdAndToken(userId, refreshToken)
 
-    if(!matchedSession){
+    if (!matchedSession) {
         throw new ApiError(401, "Session not found, please login again")
     }
 
     const isTokenValid = await verifyHash(refreshToken, matchedSession.refreshToken)
 
-    const options : CookieOptions= {
+    const options: CookieOptions = {
         httpOnly: true,
         secure: true,
         sameSite: "none",
         domain: ".swiftly.nakshjoshi.in",
     }
 
-    if(!isTokenValid){
+    if (!isTokenValid) {
         throw new ApiError(401, "Invalid refresh token, please login again")
     }
 
-    if(matchedSession.expiresAt < new Date()){
+    if (matchedSession.expiresAt < new Date()) {
         await Auth.deleteSessionById(matchedSession.id)
         res.clearCookie("refreshToken", options).clearCookie("accessToken", options)
         throw new ApiError(401, "Refresh token expired, please login again")
@@ -235,8 +235,8 @@ export const refreshToken = asyncHandler(async(req:AuthRequest, res:Response)=>{
     await Auth.saveRefreshToken(matchedSession.userId, newRefreshToken)
 
     return res
-            .cookie("accessToken", accessToken,options)
-            .cookie("refreshToken", newRefreshToken, options)
-            .json(new ApiResponse(200, null , "Token refreshed successfully"))
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", newRefreshToken, options)
+        .json(new ApiResponse(200, null, "Token refreshed successfully"))
 
 })
