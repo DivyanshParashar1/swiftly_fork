@@ -1,0 +1,142 @@
+\documentclass[10pt,a4paper]{article}
+
+% ─── Packages ────────────────────────────────────────────────────────────────
+\usepackage[top=0.6in,bottom=0.6in,left=0.65in,right=0.65in]{geometry}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{xcolor}
+\usepackage{parskip}
+
+% ─── Hyperlink colours ───────────────────────────────────────────────────────
+\hypersetup{
+  colorlinks=true,
+  urlcolor=black,
+  linkcolor=black
+}
+
+% ─── Section formatting ──────────────────────────────────────────────────────
+\titleformat{\section}
+  {\large\bfseries}
+  {}
+  {0em}
+  {}
+  [\titlerule]
+
+\titlespacing{\section}{0pt}{8pt}{4pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2pt}
+\pagestyle{empty}
+
+% ─── Helpers ─────────────────────────────────────────────────────────────────
+\newcommand{\resumeItem}[1]{\item\small{#1}}
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+% ═════════════════════════════════════════════════════════════════════════════
+\begin{document}
+% ═════════════════════════════════════════════════════════════════════════════
+
+% ─── Header ──────────────────────────────────────────────────────────────────
+\begin{center}
+  {\LARGE \textbf{ {{name}} }}\\[4pt]
+  \small
+  {{#if email}}\href{mailto:{{email}} }{ {{email}} }{{/if}}
+  {{#if phone}} $\cdot$ {{phone}}{{/if}}
+  {{#if linkedin}} $\cdot$ \href{ {{linkedin}} }{LinkedIn}{{/if}}
+  {{#if github}} $\cdot$ \href{ {{github}} }{GitHub}{{/if}}
+  {{#if website}} $\cdot$ \href{ {{website}} }{Portfolio}{{/if}}
+\end{center}
+
+% ─── Summary ─────────────────────────────────────────────────────────────────
+{{#if summary}}
+\section{Summary}
+{{summary}}
+{{/if}}
+
+% ─── Education ───────────────────────────────────────────────────────────────
+{{#if education}}
+\section{Education}
+\begin{itemize}[leftmargin=0.15in, label={}]
+{{#each education}}
+  \resumeSubheading
+    { {{instituteName}} }{ {{#if location}}{{location}}{{/if}} }
+    { {{degree}}{{#if field}}, {{field}}{{/if}} }{ {{startDate}}{{#if endDate}} -- {{endDate}}{{/if}} }
+  {{#if gpa}}
+  \begin{itemize}[leftmargin=0.3in, label=\textbullet]
+    \resumeItem{GPA/Grade: {{gpa}} }
+  \end{itemize}
+  {{/if}}
+{{/each}}
+\end{itemize}
+{{/if}}
+
+% ─── Experience ──────────────────────────────────────────────────────────────
+{{#if experience}}
+\section{Experience}
+\begin{itemize}[leftmargin=0.15in, label={}]
+{{#each experience}}
+  \resumeSubheading
+    { {{company}} }{ {{#if location}}{{location}}{{/if}} }
+    { {{role}} }{ {{startDate}}{{#if endDate}} -- {{endDate}}{{else}} -- Present{{/if}} }
+  {{#if bullets}}
+  \begin{itemize}[leftmargin=0.3in, label=\textbullet]
+    {{#each bullets}}
+    \resumeItem{ {{this}} }
+    {{/each}}
+  \end{itemize}
+  {{/if}}
+{{/each}}
+\end{itemize}
+{{/if}}
+
+% ─── Projects ────────────────────────────────────────────────────────────────
+{{#if projects}}
+\section{Projects}
+\begin{itemize}[leftmargin=0.15in, label={}]
+{{#each projects}}
+  \item
+  \textbf{ {{name}} }
+  {{#if link}} $|$ \href{ {{link}} }{\small\textit{Link}}{{/if}}
+  {{#if tech_stack}}$|$ \small\textit{ {{joinComma tech_stack}} }{{/if}}\\
+  \small{{description}}
+{{/each}}
+\end{itemize}
+{{/if}}
+
+% ─── Skills ──────────────────────────────────────────────────────────────────
+{{#if skillCategories}}
+\section{Skills}
+\begin{itemize}[leftmargin=0.15in, label={}]
+{{#each skillCategories}}
+  \item \textbf{ {{category}} :} {{joinComma skills}}
+{{/each}}
+\end{itemize}
+{{/if}}
+
+% ─── Certifications ──────────────────────────────────────────────────────────
+{{#if certifications}}
+\section{Certifications}
+\begin{itemize}[leftmargin=0.15in, label=\textbullet]
+{{#each certifications}}
+  \resumeItem{\textbf{ {{name}} } --- {{issuer}}{{#if date}}, {{date}}{{/if}} }
+{{/each}}
+\end{itemize}
+{{/if}}
+
+% ─── Custom Sections ─────────────────────────────────────────────────────────
+{{#each custom_sections}}
+\section{ {{title}} }
+{{content}}
+{{/each}}
+
+% ═════════════════════════════════════════════════════════════════════════════
+\end{document}

@@ -430,6 +430,23 @@ export const resumeApi = {
       handleAxiosError(error);
     }
   },
+
+  /**
+   * Requests PDF compilation for a resume and returns a Blob.
+   * The caller is responsible for triggering the browser download.
+   */
+  exportResumeToPdf: async (resumeId: string): Promise<Blob> => {
+    try {
+      const response = await apiClient.post(
+        '/api/v1/resume/export/pdf',
+        { resumeId },
+        { responseType: 'blob' }
+      );
+      return response.data as Blob;
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
 };
 
 export const updateApi = {

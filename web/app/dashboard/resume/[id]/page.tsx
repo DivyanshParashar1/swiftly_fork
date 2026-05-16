@@ -17,6 +17,7 @@ import {
   type PorRecord,
   type PublicationRecord,
 } from '@/lib/api';
+import { clearAuthUser } from '@/lib/authSession';
 
 type TabKey =
   | 'overview'
@@ -143,6 +144,7 @@ export default function ResumeDetailPage() {
   const [activeTab, setActiveTab] = useState<TabKey>('overview');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [resume, setResume] = useState<ResumeDetailRecord | null>(null);
 
   const [editingKey, setEditingKey] = useState<string | null>(null);
@@ -215,6 +217,36 @@ export default function ResumeDetailPage() {
   useEffect(() => {
     void loadResume();
   }, [loadResume]);
+
+  const handleExportPdf = async () => {
+    if (!resume) return;
+    setIsExporting(true);
+    try {
+      const blob = await resumeApi.exportResumeToPdf(resume.id);
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      const filename = (resume.title || [resume.firstName, resume.lastName].filter(Boolean).join('_') || 'resume').replace(/\s+/g, '_');
+      anchor.href = url;
+      anchor.download = `${filename}.pdf`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+      enqueueSnackbar('PDF downloaded successfully', { variant: 'success' });
+    } catch (error) {
+      if (error instanceof ApiError && error.statusCode === 401) {
+        clearAuthUser();
+        enqueueSnackbar('Session expired. Please sign in again.', { variant: 'warning' });
+        router.push('/signin');
+        return;
+      }
+      if (error instanceof ApiError) {
+        enqueueSnackbar(error.message, { variant: 'error' });
+      } else {
+        enqueueSnackbar('PDF export failed. Make sure pdflatex is available on the server.', { variant: 'error' });
+      }
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const tabCounts = useMemo(() => {
     if (!resume) return {} as Record<TabKey, number>;
@@ -905,12 +937,32 @@ export default function ResumeDetailPage() {
                 <span className="font-mono text-blue-600">{'/>'}</span>
               </h1>
             </div>
-            <Link
-              href="/dashboard"
-              className="self-start px-4 py-2 text-sm font-mono text-gray-700 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:text-blue-600 transition-all"
-            >
-              ← back()
-            </Link>
+            <div className="flex items-center gap-2 self-start">
+              {resume && (
+                <button
+                  id="export-pdf-btn"
+                  type="button"
+                  onClick={() => void handleExportPdf()}
+                  disabled={isExporting || isLoading}
+                  className="px-4 py-2 text-sm font-mono bg-black text-white border-2 border-black rounded-lg hover:bg-blue-600 hover:border-blue-600 transition-all shadow-md hover:shadow-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+                >
+                  {isExporting ? (
+                    <>
+                      <span className="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      compiling...
+                    </>
+                  ) : (
+                    <>↓ exportPDF()</>
+                  )}
+                </button>
+              )}
+              <Link
+                href="/dashboard"
+                className="px-4 py-2 text-sm font-mono text-gray-700 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:text-blue-600 transition-all"
+              >
+                ← back()
+              </Link>
+            </div>
           </div>
         </section>
 
