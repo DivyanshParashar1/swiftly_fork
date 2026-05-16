@@ -258,7 +258,24 @@ export class LatexExportService {
         const compiledTemplate = Handlebars.compile(templateSrc, { noEscape: true });
         const latexSource = compiledTemplate(context);
 
-        // 4. Send to LaTeX Online API
+        return this.compileLatexViaApi(latexSource);
+    }
+
+    public async exportToPdfFromJson(resumeData: any, templateId?: string): Promise<Buffer> {
+        // Build template context from raw JSON (assuming it matches the Prisma structure)
+        const context = buildTemplateContext(resumeData);
+
+        // Render Handlebars template
+        // Note: For v1, we only have one template, so we ignore templateId
+        const templateSrc = await fs.promises.readFile(this.templatePath, 'utf-8');
+        const compiledTemplate = Handlebars.compile(templateSrc, { noEscape: true });
+        const latexSource = compiledTemplate(context);
+
+        // Send to LaTeX API
+        return this.compileLatexViaApi(latexSource);
+    }
+
+    private async compileLatexViaApi(latexSource: string): Promise<Buffer> {
         try {
             const response = await fetch('https://latex.ytotech.com/builds/sync', {
                 method: 'POST',

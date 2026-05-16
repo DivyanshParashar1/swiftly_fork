@@ -133,3 +133,17 @@ export const updatePublicationsForResume = asyncHandler(async(req:AuthRequest, r
         .json(result)
 
 })
+
+export const updateFullResume = asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.userId!;
+    const resumeId = req.params.id || req.body.id;
+    const fullData = req.body;
+
+    if (!resumeId) {
+        return res.status(400).json({ message: "Resume ID is required" });
+    }
+
+    const result = await profile.updateFullResumeTree(userId, resumeId, fullData);
+
+    return res.status(200).json(result);
+});

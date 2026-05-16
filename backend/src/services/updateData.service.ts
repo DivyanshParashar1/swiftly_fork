@@ -201,7 +201,34 @@ export class ProfileUpdate{
     }
     
 
-        
+    public async updateFullResumeTree(user: string, resumeId: string, fullData: any) {
+        const { id, userId, createdAt, updatedAt, education, experience, projects, skills, achievements, pors, publications, ...scalarData } = fullData;
 
+        // Strip IDs from arrays to allow Prisma create to generate new ones
+        const stripIds = (arr: any[]) => arr?.map(({ id, resumeId, ...rest }) => rest) || [];
+
+        return prisma.resume.update({
+            where: { id: resumeId, userId: user },
+            data: {
+                ...scalarData,
+                education: { deleteMany: {}, create: stripIds(education) },
+                experience: { deleteMany: {}, create: stripIds(experience) },
+                projects: { deleteMany: {}, create: stripIds(projects) },
+                skills: { deleteMany: {}, create: stripIds(skills) },
+                achievements: { deleteMany: {}, create: stripIds(achievements) },
+                pors: { deleteMany: {}, create: stripIds(pors) },
+                publications: { deleteMany: {}, create: stripIds(publications) },
+            },
+            include: {
+                education: true,
+                experience: true,
+                projects: true,
+                skills: true,
+                achievements: true,
+                pors: true,
+                publications: true,
+            }
+        });
+    }
 
 }

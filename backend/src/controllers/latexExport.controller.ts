@@ -28,3 +28,19 @@ export const exportResumeToPdf = asyncHandler(async (req: AuthRequest, res: Resp
     res.setHeader('Content-Length', pdfBuffer.length);
     res.end(pdfBuffer);
 });
+
+export const previewResumePdf = asyncHandler(async (req: AuthRequest, res: Response) => {
+    const resumeData = req.body;
+    const templateId = req.query.templateId as string | undefined;
+
+    if (!resumeData || Object.keys(resumeData).length === 0) {
+        throw new ApiError(400, 'resumeData is required in the request body');
+    }
+
+    const pdfBuffer = await latexExportService.exportToPdfFromJson(resumeData, templateId);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename="preview.pdf"');
+    res.setHeader('Content-Length', pdfBuffer.length);
+    res.end(pdfBuffer);
+});
