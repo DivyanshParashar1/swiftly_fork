@@ -7,6 +7,7 @@ import cors from "cors"
 import updateRouter from './routes/update.routes'
 import fetchRouter from './routes/fetch.routes'
 import extensionRouter from './routes/extension.route'
+import migrateRouter from './routes/migrate.routes'
 
 
 const port = process.env.PORT || 3001
@@ -31,6 +32,7 @@ app.use('/api/v1/resume', resumeRouter)
 app.use('/api/v1/update', updateRouter)
 app.use('/api/v1/fetch', fetchRouter)
 app.use('/api/v1/extension', extensionRouter)
+app.use('/api/v1/migrate', migrateRouter)
 
 app.get('/health', (req,res)=>{
     res.send('Health Check Ok!')

@@ -508,6 +508,42 @@ export const updateApi = {
 
 
 
+export interface LatexTemplate {
+  id: string;
+  name: string;
+  description: string;
+  thumbnail: string | null;
+}
+
+export const migrateApi = {
+  listTemplates: async (): Promise<ApiResponse<LatexTemplate[]>> => {
+    try {
+      const response = await apiClient.get<ApiResponse<LatexTemplate[]>>('/api/v1/migrate/templates');
+      return toApiResponse<LatexTemplate[]>(response.data, 'Templates fetched');
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
+
+  /**
+   * Compile a resume to PDF using a LaTeX template.
+   * Returns a Blob URL that can be used to trigger a browser download.
+   */
+  compileToPdf: async (resumeId: string, templateId: string): Promise<Blob> => {
+    try {
+      const response = await apiClient.post(
+        '/api/v1/migrate/compile',
+        { resumeId, templateId },
+        { responseType: 'blob' }
+      );
+      return response.data as Blob;
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
+};
+
+
 
 
 export { ApiError };

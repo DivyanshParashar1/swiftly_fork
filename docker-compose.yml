@@ -1,0 +1,18 @@
+services:
+  latex-service:
+    build:
+      context: ./latex-service
+      dockerfile: Dockerfile
+    container_name: swiftly-latex-service
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - NODE_ENV=production
+    restart: unless-stopped
+    # Resource limits — pdflatex can be memory hungry
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+          cpus: '1.0'
