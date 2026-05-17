@@ -91,6 +91,12 @@ export default function Navbar() {
                 <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-500 group-hover:w-full transition-all duration-300"></div>
               </Link>
             ) : null}
+            {authUser ? (
+              <Link href="/migrate-resume" className="px-4 py-2 text-indigo-700 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition-colors font-mono text-sm relative group border border-indigo-200">
+                <span className="relative z-10">migrateResume()</span>
+                <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-indigo-500 group-hover:w-full transition-all duration-300"></div>
+              </Link>
+            ) : null}
           </div>
 
           {/* Action buttons with dev style */}
@@ -183,6 +189,9 @@ export default function Navbar() {
                 <>
                   <Link onClick={closeMobileMenu} href="/dashboard" className="block px-4 py-3 text-orange-700 hover:text-orange-800 hover:bg-orange-50 rounded-lg transition-colors font-mono text-sm border border-orange-200">
                     dashboard()
+                  </Link>
+                  <Link onClick={closeMobileMenu} href="/migrate-resume" className="block px-4 py-3 text-indigo-700 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition-colors font-mono text-sm border border-indigo-200">
+                    migrateResume()
                   </Link>
                   <Link
                     onClick={closeMobileMenu}
