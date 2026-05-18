@@ -35,7 +35,7 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: 'projects', label: 'projects[]' },
   { key: 'skills', label: 'skills[]' },
   { key: 'achievements', label: 'achievements[]' },
-  { key: 'pors', label: 'pors[]' },
+  { key: 'pors', label: 'positionsOfResponsibility[]' },
   { key: 'publications', label: 'publications[]' },
 ];
 
@@ -154,7 +154,6 @@ export default function ResumeDetailPage() {
   const resumeId = params.id as string;
   const { enqueueSnackbar } = useSnackbar();
 
-  const [activeTab, setActiveTab] = useState<TabKey>('overview');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [resume, setResume] = useState<ResumeDetailRecord | null>(null);
@@ -974,52 +973,56 @@ export default function ResumeDetailPage() {
           </div>
         ) : resume ? (
           <>
-            <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow border-2 border-gray-200/50 p-2 overflow-x-auto">
+            <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow border-2 border-gray-200/50 p-2 overflow-x-auto sticky top-4 z-20">
               <div className="flex gap-1 min-w-max">
                 {TABS.map((tab) => {
-                  const isActive = activeTab === tab.key;
                   const count = tabCounts[tab.key];
                   return (
-                    <button
+                    <a
                       key={tab.key}
-                      type="button"
-                      onClick={() => {
-                        setActiveTab(tab.key);
-                        cancelEdit();
-                      }}
-                      className={`px-3 py-2 rounded-lg font-mono text-xs whitespace-nowrap transition-all flex items-center gap-1.5 ${
-                        isActive
-                          ? 'bg-black text-white shadow-md'
-                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                      }`}
+                      href={`#${tab.key}`}
+                      className="px-3 py-2 rounded-lg font-mono text-xs whitespace-nowrap transition-all flex items-center gap-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                     >
                       {tab.label}
                       {tab.key !== 'overview' && (
-                        <span
-                          className={`text-xs rounded-full px-1.5 py-0.5 font-mono ${
-                            isActive
-                              ? count > 0 ? 'bg-blue-500 text-white' : 'bg-gray-600 text-gray-200'
-                              : count > 0 ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-400'
-                          }`}
-                        >
+                        <span className={`text-xs rounded-full px-1.5 py-0.5 font-mono ${count > 0 ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-400'}`}>
                           {count}
                         </span>
                       )}
-                    </button>
+                    </a>
                   );
                 })}
               </div>
             </div>
 
-            <div className="bg-white/60 backdrop-blur-lg rounded-2xl shadow border-2 border-gray-200/50 p-5 md:p-7">
-              {activeTab === 'overview' && renderOverview()}
-              {activeTab === 'education' && renderEducation(resume.education)}
-              {activeTab === 'experience' && renderExperience(resume.experience)}
-              {activeTab === 'projects' && renderProjects(resume.projects)}
-              {activeTab === 'skills' && renderSkills(resume.skills)}
-              {activeTab === 'achievements' && renderAchievements(resume.achievements)}
-              {activeTab === 'pors' && renderPors(resume.pors)}
-              {activeTab === 'publications' && renderPublications(resume.publications)}
+            <div className="space-y-8">
+              {TABS.map((tab) => {
+                let content = null;
+                if (tab.key === 'overview') content = renderOverview();
+                else if (tab.key === 'education') content = renderEducation(resume.education);
+                else if (tab.key === 'experience') content = renderExperience(resume.experience);
+                else if (tab.key === 'projects') content = renderProjects(resume.projects);
+                else if (tab.key === 'skills') content = renderSkills(resume.skills);
+                else if (tab.key === 'achievements') content = renderAchievements(resume.achievements);
+                else if (tab.key === 'pors') content = renderPors(resume.pors);
+                else if (tab.key === 'publications') content = renderPublications(resume.publications);
+
+                return (
+                  <section key={tab.key} id={tab.key} className="bg-white/60 backdrop-blur-lg rounded-2xl shadow border-2 border-gray-200/50 p-5 md:p-7 scroll-mt-24">
+                    <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200/50">
+                      <h2 className="text-xl font-bold text-gray-900 font-mono text-blue-600">
+                        {tab.label}
+                      </h2>
+                      {tab.key !== 'overview' && (
+                        <span className={`text-xs rounded-full px-2 py-0.5 font-mono ${tabCounts[tab.key] > 0 ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}>
+                          {tabCounts[tab.key]}
+                        </span>
+                      )}
+                    </div>
+                    {content}
+                  </section>
+                );
+              })}
             </div>
           </>
         ) : null}
