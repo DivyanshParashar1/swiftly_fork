@@ -213,6 +213,11 @@ const MONTH_FULL_NAMES: Record<string, number> = {
   july: 6, august: 7, september: 8, october: 9, november: 10, december: 11,
 };
 
+const MONTH_ABBR_LOOKUP: Record<string, number> = {
+  jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+  jul: 6, aug: 7, sep: 8, sept: 8, oct: 9, nov: 10, dec: 11,
+};
+
 /** Keys that hold date values — format them from ISO to "Mon YYYY". */
 const DATE_KEYS = new Set([
   'startDate', 'endDate', 'date', 'publicationDate',
@@ -220,9 +225,13 @@ const DATE_KEYS = new Set([
 
 /**
  * Convert a date string to "Mon YYYY" (e.g. "Aug 2023").
- * Handles: ISO (2023-08-01), full month name (August 2023), abbrev (Aug 2023).
- * Normalizes "present"/"current"/"now" → "Present".
- * Passes through year-only strings (e.g. "2025") unchanged.
+ * Handles:
+ *   - ISO: 2023-08-01, 2023-08, 2023-8, 2023-8-1
+ *   - Slash/dash numeric: 08/2023, 8-2023, 08/01/2023
+ *   - Full month name: "August 2023", "August, 2023"
+ *   - Abbreviated month: "Aug 2023", "Aug. 2023", "Sept 2023"
+ *   - "Present"/"Current"/"Now"/"Ongoing"/"Till date" → "Present"
+ * Passes year-only strings (e.g. "2025") through unchanged.
  */
 function formatDate(val: string | null | undefined): string {
   if (!val) return '';
@@ -230,12 +239,15 @@ function formatDate(val: string | null | undefined): string {
 
   // Normalize "Present" variants
   const lc = trimmed.toLowerCase();
-  if (lc === 'present' || lc === 'current' || lc === 'now' || lc === 'ongoing') {
+  if (
+    lc === 'present' || lc === 'current' || lc === 'now' || lc === 'ongoing' ||
+    lc === 'till date' || lc === 'till now' || lc === 'to date'
+  ) {
     return 'Present';
   }
 
   // ISO format: YYYY-MM or YYYY-MM-DD → "Mon YYYY"
-  const isoMatch = trimmed.match(/^(\d{4})-(\d{2})(?:-\d{2})?$/);
+  const isoMatch = trimmed.match(/^(\d{4})-(\d{1,2})(?:-\d{1,2})?$/);
   if (isoMatch) {
     const year = isoMatch[1]!;
     const monthIdx = parseInt(isoMatch[2]!, 10) - 1;
@@ -244,16 +256,30 @@ function formatDate(val: string | null | undefined): string {
     }
   }
 
-  // Full month name: "January 2023" → "Jan 2023"
-  const fullMatch = trimmed.match(/^([A-Za-z]+)\s+(\d{4})$/);
-  if (fullMatch) {
-    const idx = MONTH_FULL_NAMES[fullMatch[1]!.toLowerCase()];
-    if (idx !== undefined) {
-      return `${MONTH_ABBR[idx]} ${fullMatch[2]}`;
+  // Numeric slash/dash: MM/YYYY, M/YYYY, MM-YYYY, MM/DD/YYYY
+  const slashMatch = trimmed.match(/^(\d{1,2})[\/\-](?:\d{1,2}[\/\-])?(\d{4})$/);
+  if (slashMatch) {
+    const year = slashMatch[2]!;
+    const monthIdx = parseInt(slashMatch[1]!, 10) - 1;
+    if (monthIdx >= 0 && monthIdx < 12) {
+      return `${MONTH_ABBR[monthIdx]} ${year}`;
     }
   }
 
-  return trimmed; // year-only ("2025"), already formatted ("Aug 2023"), etc.
+  // Month name (full or abbreviated) + year: "January 2023", "Jan. 2023", "Sept 2023", "August, 2023"
+  const nameMatch = trimmed.match(/^([A-Za-z]+)\.?,?\s+(\d{4})$/);
+  if (nameMatch) {
+    const key = nameMatch[1]!.toLowerCase();
+    const year = nameMatch[2]!;
+    if (key in MONTH_FULL_NAMES) {
+      return `${MONTH_ABBR[MONTH_FULL_NAMES[key]!]} ${year}`;
+    }
+    if (key in MONTH_ABBR_LOOKUP) {
+      return `${MONTH_ABBR[MONTH_ABBR_LOOKUP[key]!]} ${year}`;
+    }
+  }
+
+  return trimmed; // year-only ("2025"), unknown format, etc.
 }
 
 /** Recursively format date fields in an object tree. */

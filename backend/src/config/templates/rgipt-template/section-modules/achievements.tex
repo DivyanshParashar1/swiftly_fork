@@ -1,10 +1,14 @@
 % ----------------- Achievements ------------------------
-\section{Achievements}
+\section{Achievements \& Position of Responsibility}
 \vspace{0pt}
 \resumeSubHeadingListStart
 
 {{#each achievements}}
 \resumePOR{-- \textbf{ {{title}} } }{ {{#if description}}{{description}}{{/if}} }{ {{date}} }
+{{/each}}
+
+{{#each pors}}
+\resumePOR{-- \textbf{ {{title}} } }{ {{#if description}}{{description}}{{/if}} }{ {{startDate}} -- {{endDate}} }
 {{/each}}
 
 \resumeSubHeadingListEnd
