@@ -1,0 +1,19 @@
+%-----------PROJECTS-----------------
+\section{Projects}
+\vspace{0pt}
+\resumeSubHeadingListStart
+
+{{#each projects}}
+\resumeProject
+  {{{{projectName}}} {{#if githubLink}}| \href{{{{githubLink}}}}{\faGithub} {{/if}}{{#if liveLink}}| \href{{{{liveLink}}}}{\faLink}{{/if}}}
+  {{{#if techStackStr}}\textbf{Tools \& technologies used:} {{{techStackStr}}}{{/if}}}
+  {{{{startDate}}} -- {{{endDate}}}}
+  {}
+
+  \resumeItemListStart
+    \item {{{{description}}}}
+  \resumeItemListEnd
+{{/each}}
+
+\resumeSubHeadingListEnd
+\vspace{-5.5mm}

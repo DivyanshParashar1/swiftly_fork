@@ -1,0 +1,16 @@
+%-----------PUBLICATIONS---------------
+\section{Publications}
+\vspace{0pt}
+\resumeSubHeadingListStart
+
+{{#each publications}}
+\resumeSubheading
+  {{{{title}}}}{{{{publicationDate}}}}
+  {{{{authors}}} - {{{conference}}}}{{{{place}}}}
+  \resumeItemListStart
+    \item {{{{description}}}}
+  \resumeItemListEnd
+{{/each}}
+
+\resumeSubHeadingListEnd
+\vspace{-4mm}
