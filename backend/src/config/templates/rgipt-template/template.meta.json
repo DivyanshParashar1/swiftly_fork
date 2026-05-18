@@ -1,0 +1,15 @@
+{
+  "id": "rgipt-template",
+  "supportsSectionReordering": true,
+  "supportsItemVisibility": true,
+  "requiredUserInputs": ["roll", "course", "collegeEmail"],
+  "defaultSectionOrder": [
+    "education",
+    "experience",
+    "projects",
+    "skills",
+    "achievements",
+    "por",
+    "publications"
+  ]
+}

@@ -1,17 +1,17 @@
 {
   "templates": [
     {
-      "id": "classic",
-      "name": "Classic",
-      "description": "Clean, traditional single-column layout. ATS-friendly and universally readable.",
-      "file": "src/config/templates/classic.tex",
+      "id": "jakes-resume",
+      "name": "Jake's Resume",
+      "description": "Classic ATS-friendly single-column layout with clean section dividers. Industry standard format.",
+      "file": "src/config/templates/jakes-resume/index.tex",
       "thumbnail": null
     },
     {
-      "id": "modern",
-      "name": "Modern",
-      "description": "Dark header with accent colors. Professional, contemporary look for tech roles.",
-      "file": "src/config/templates/modern.tex",
+      "id": "rgipt-template",
+      "name": "RGIPT Template",
+      "description": "Academic multi-section format with institute logo support. Ideal for campus placements.",
+      "file": "src/config/templates/rgipt-template/index.tex",
       "thumbnail": null
     }
   ]

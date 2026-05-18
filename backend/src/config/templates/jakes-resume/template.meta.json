@@ -1,0 +1,16 @@
+{
+  "id": "jakes-resume",
+  "supportsSectionReordering": true,
+  "supportsItemVisibility": true,
+  "requiredUserInputs": [],
+  "defaultSectionOrder": [
+    "summary",
+    "education",
+    "experience",
+    "projects",
+    "skills",
+    "achievements",
+    "por",
+    "publications"
+  ]
+}

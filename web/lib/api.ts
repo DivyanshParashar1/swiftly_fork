@@ -515,6 +515,26 @@ export interface LatexTemplate {
   thumbnail: string | null;
 }
 
+export interface MigrationSection {
+  key: string;
+  visible: boolean;
+  itemOrder: string[];
+  hiddenItems: string[];
+}
+
+export interface MigrationConfig {
+  sections: MigrationSection[];
+  userInputs: Record<string, string>;
+}
+
+export interface TemplateMeta {
+  id: string;
+  supportsSectionReordering: boolean;
+  supportsItemVisibility: boolean;
+  requiredUserInputs: string[];
+  defaultSectionOrder: string[];
+}
+
 export const migrateApi = {
   listTemplates: async (): Promise<ApiResponse<LatexTemplate[]>> => {
     try {
@@ -525,18 +545,52 @@ export const migrateApi = {
     }
   },
 
+  /** Fetch template.meta.json — defaultSectionOrder, requiredUserInputs, etc. */
+  getTemplateMeta: async (templateId: string): Promise<ApiResponse<TemplateMeta>> => {
+    try {
+      const response = await apiClient.get<ApiResponse<TemplateMeta>>(`/api/v1/migrate/meta/${templateId}`);
+      return toApiResponse<TemplateMeta>(response.data, 'Template meta fetched');
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
+
+  /** Fetch mapToDbSchema.json — drives USER_INPUT form generation. */
+  getTemplateSchema: async (templateId: string): Promise<ApiResponse<Record<string, unknown>>> => {
+    try {
+      const response = await apiClient.get<ApiResponse<Record<string, unknown>>>(`/api/v1/migrate/schema/${templateId}`);
+      return toApiResponse<Record<string, unknown>>(response.data, 'Template schema fetched');
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
+
   /**
    * Compile a resume to PDF using a LaTeX template.
-   * Returns a Blob URL that can be used to trigger a browser download.
+   * Accepts an optional migrationConfig to control sections + user inputs.
    */
-  compileToPdf: async (resumeId: string, templateId: string): Promise<Blob> => {
+  compileToPdf: async (resumeId: string, templateId: string, migrationConfig?: MigrationConfig): Promise<Blob> => {
     try {
       const response = await apiClient.post(
         '/api/v1/migrate/compile',
-        { resumeId, templateId },
+        { resumeId, templateId, migrationConfig },
         { responseType: 'blob' }
       );
       return response.data as Blob;
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
+
+  /** Get rendered .tex source (Handlebars resolved, sections assembled). */
+  getLatexSource: async (resumeId: string, templateId: string, migrationConfig?: MigrationConfig): Promise<string> => {
+    try {
+      const response = await apiClient.post<string>(
+        '/api/v1/migrate/latex',
+        { resumeId, templateId, migrationConfig },
+        { responseType: 'text' }
+      );
+      return response.data;
     } catch (error) {
       handleAxiosError(error);
     }
