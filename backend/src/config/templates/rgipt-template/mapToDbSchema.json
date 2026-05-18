@@ -1,0 +1,77 @@
+{
+  "firstName": "firstName",
+  "lastName": "lastName",
+  "phoneNumber": "phoneNumber",
+  "resumeEmail": "resumeEmail",
+  "linkedIn": "linkedIn",
+  "github": "github",
+  
+  "roll": "USER_INPUT",
+  "course": "USER_INPUT",
+  "collegeEmail": "USER_INPUT",
+
+  "summary": "summary",
+  
+  "education": {
+    "_db_source": "education",
+    "instituteName": "instituteName",
+    "startDate": "startDate",
+    "endDate": "endDate",
+    "location": "location",
+    "degree": "degree",
+    "branch": "branch"
+  },
+
+  "experience": {
+    "_db_source": "experience",
+    "companyName": "companyName",
+    "proofLink": "proofLink",
+    "startDate": "startDate",
+    "endDate": "endDate",
+    "position": "position",
+    "location": "location",
+    "description": "description"
+  },
+
+  "projects": {
+    "_db_source": "projects",
+    "projectName": "projectName",
+    "techStackStr": "techStack",
+    "githubLink": "githubLink",
+    "liveLink": "liveLink",
+    "startDate": "startDate",
+    "endDate": "endDate",
+    "description": "description"
+  },
+
+  "skillCategories": {
+    "_db_source": "skills",
+    "category": "category",
+    "skills": "name"
+  },
+
+  "achievements": {
+    "_db_source": "achievements",
+    "title": "title",
+    "date": "date",
+    "description": "description"
+  },
+
+  "pors": {
+    "_db_source": "pors",
+    "title": "title",
+    "org": "org",
+    "startDate": "startDate",
+    "endDate": "endDate"
+  },
+
+  "publications": {
+    "_db_source": "publications",
+    "title": "title",
+    "publicationDate": "publicationDate",
+    "authors": "authors",
+    "conference": "conference",
+    "place": "place",
+    "description": "description"
+  }
+}

@@ -1,0 +1,16 @@
+%-----------EXPERIENCE-----------------
+\section{Experience}
+\vspace{0pt}
+\resumeSubHeadingListStart
+
+{{#each experience}}
+\resumeSubheading
+  { {{companyName}} {{#if proofLink}}\href{ {{proofLink}} }{\faLink}{{/if}} }{ {{startDate}} -- {{endDate}} }
+  { {{position}} }{ {{location}} }
+  \resumeItemListStart
+    \item {{description}}
+  \resumeItemListEnd
+{{/each}}
+
+\resumeSubHeadingListEnd
+\vspace{-5.5mm}

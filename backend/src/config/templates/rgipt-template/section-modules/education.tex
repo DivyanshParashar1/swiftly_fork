@@ -1,0 +1,14 @@
+%-----------EDUCATION-----------------
+\section{Education}
+\vspace{0pt}
+
+\resumeSubHeadingListStart
+
+    {{#each education}}
+    \resumeSubheading
+    { {{instituteName}} }{ {{startDate}} -- {{endDate}} }
+    { {{degree}}{{#if branch}} in {{branch}}{{/if}} }{ {{location}} }
+    {{/each}}
+
+\resumeSubHeadingListEnd
+\vspace{-4mm}

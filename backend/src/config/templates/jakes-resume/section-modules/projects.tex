@@ -1,0 +1,18 @@
+%-----------PROJECTS-----------
+\section{Projects}
+    \vspace{-5pt}
+    \resumeSubHeadingListStart
+
+
+    {{#each projects}}
+        \resumeProjectHeading
+          {\textbf{ {{projectName}} } {{#if techStackStr}}$|$ \emph{ {{techStackStr}} }{{/if}} }{ {{#if githubLink}}\href{ {{githubLink}} }{Github}{{/if}}{{#if liveLink}} \textbar\ \href{ {{liveLink}} }{Link}{{/if}} }
+          \resumeItemListStart
+            \resumeItem{ {{description}} }
+          \resumeItemListEnd
+          {{#unless @last}}\vspace{-13pt}{{/unless}}
+
+    {{/each}}
+    
+    \resumeSubHeadingListEnd
+\vspace{-15pt}
