@@ -76,6 +76,16 @@ function DateRange({ start, end }: { start?: string | null; end?: string | null 
   );
 }
 
+function ExternalLink({ href }: { href?: string | null }) {
+  if (!href) return '-';
+  const url = href.startsWith('http') ? href : `https://${href}`;
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline break-all">
+      {href}
+    </a>
+  );
+}
+
 const inputClass =
   'w-full px-3 py-2 rounded-lg border-2 border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-hidden focus:border-blue-500 text-sm';
 const textareaClass = `${inputClass} min-h-24 resize-y`;
@@ -285,12 +295,12 @@ export default function ResumeDetailPage() {
               <div><span className={labelClass}>country</span><p>{resume.country || '-'}</p></div>
               <div><span className={labelClass}>dateOfBirth</span><p>{resume.dateOfBirth || '-'}</p></div>
               <div><span className={labelClass}>yearOfGraduation</span><p>{resume.yearOfGraduation ?? '-'}</p></div>
-              <div><span className={labelClass}>linkedIn</span><p className="break-all">{resume.linkedIn || '-'}</p></div>
-              <div><span className={labelClass}>github</span><p className="break-all">{resume.github || '-'}</p></div>
-              <div><span className={labelClass}>personalPortfolio</span><p className="break-all">{resume.personalPortfolio || '-'}</p></div>
-              <div><span className={labelClass}>leetCode</span><p>{resume.leetCode || '-'}</p></div>
-              <div><span className={labelClass}>codingProfile2</span><p>{resume.codingProfile2 || '-'}</p></div>
-              <div><span className={labelClass}>codingProfile3</span><p>{resume.codingProfile3 || '-'}</p></div>
+              <div><span className={labelClass}>linkedIn</span><p className="break-all"><ExternalLink href={resume.linkedIn} /></p></div>
+              <div><span className={labelClass}>github</span><p className="break-all"><ExternalLink href={resume.github} /></p></div>
+              <div><span className={labelClass}>personalPortfolio</span><p className="break-all"><ExternalLink href={resume.personalPortfolio} /></p></div>
+              <div><span className={labelClass}>leetCode</span><p className="break-all"><ExternalLink href={resume.leetCode} /></p></div>
+              <div><span className={labelClass}>codingProfile2</span><p className="break-all"><ExternalLink href={resume.codingProfile2} /></p></div>
+              <div><span className={labelClass}>codingProfile3</span><p className="break-all"><ExternalLink href={resume.codingProfile3} /></p></div>
               <div className="sm:col-span-2"><span className={labelClass}>address</span><p>{resume.address || '-'}</p></div>
             </div>
 
@@ -404,7 +414,7 @@ export default function ResumeDetailPage() {
                     </button>
                   </div>
                 </div>
-                <div className="flex gap-3 text-xs font-mono text-gray-500">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs font-mono text-gray-500">
                   <span>level: {edu.level || '-'}</span>
                   <span>location: {edu.location || '-'}</span>
                   <span>grade: {edu.grade || '-'}</span>
@@ -487,7 +497,11 @@ export default function ResumeDetailPage() {
                     </button>
                   </div>
                 </div>
-                <p className="text-xs font-mono text-gray-500">type: {exp.type || '-'}</p>
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs font-mono text-gray-500 break-all">
+                  <span>type: {exp.type || '-'}</span>
+                  <span>location: {exp.location || '-'}</span>
+                  <span>proofLink: <ExternalLink href={exp.proofLink} /></span>
+                </div>
                 <p className="text-sm text-gray-700 whitespace-pre-line">{exp.description || '-'}</p>
               </div>
             );
@@ -561,17 +575,23 @@ export default function ResumeDetailPage() {
               <div key={proj.id} className="bg-white rounded-xl border-2 border-gray-200 p-5 space-y-3 hover:border-blue-300 transition-colors">
                 <div className="flex justify-between gap-2">
                   <h4 className="font-semibold text-gray-900">{proj.projectName || 'Project'}</h4>
-                  <button
-                    type="button"
-                    onClick={() => beginEdit(key, { ...proj, techStack: (proj.techStack || []).join(', ') } as Record<string, string | null | undefined>)}
-                    className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 font-mono text-xs hover:border-blue-500 hover:text-blue-700"
-                  >
-                    edit()
-                  </button>
+                  <div className="flex items-start gap-2">
+                    <DateRange start={proj.startDate} end={proj.endDate} />
+                    <button
+                      type="button"
+                      onClick={() => beginEdit(key, { ...proj, techStack: (proj.techStack || []).join(', ') } as Record<string, string | null | undefined>)}
+                      className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 font-mono text-xs hover:border-blue-500 hover:text-blue-700"
+                    >
+                      edit()
+                    </button>
+                  </div>
                 </div>
-                <DateRange start={proj.startDate} end={proj.endDate} />
+                <div className="flex flex-col gap-1 text-xs font-mono text-gray-500 break-all">
+                  <span>techStack: {(proj.techStack || []).join(', ') || '-'}</span>
+                  <span>githubLink: <ExternalLink href={proj.githubLink} /></span>
+                  <span>liveLink: <ExternalLink href={proj.liveLink} /></span>
+                </div>
                 <p className="text-sm text-gray-700 whitespace-pre-line">{proj.description || '-'}</p>
-                <p className="text-xs font-mono text-gray-500">techStack: {(proj.techStack || []).join(', ') || '-'}</p>
               </div>
             );
           }
@@ -701,7 +721,10 @@ export default function ResumeDetailPage() {
                     edit()
                   </button>
                 </div>
-                <p className="text-xs font-mono text-gray-500">org: {ach.org || '-'} | date: {ach.date || '-'}</p>
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs font-mono text-gray-500">
+                  <span>org: {ach.org || '-'}</span>
+                  <span>date: {ach.date || '-'}</span>
+                </div>
                 <p className="text-sm text-gray-700 whitespace-pre-line">{ach.description || '-'}</p>
               </div>
             );
@@ -758,16 +781,18 @@ export default function ResumeDetailPage() {
               <div key={por.id} className="bg-white rounded-xl border-2 border-gray-200 p-5 space-y-2 hover:border-blue-300 transition-colors">
                 <div className="flex justify-between gap-2">
                   <h4 className="font-semibold text-gray-900">{por.title || 'Role'}</h4>
-                  <button
-                    type="button"
-                    onClick={() => beginEdit(key, por)}
-                    className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 font-mono text-xs hover:border-blue-500 hover:text-blue-700"
-                  >
-                    edit()
-                  </button>
+                  <div className="flex items-start gap-2">
+                    <DateRange start={por.startDate} end={por.endDate} />
+                    <button
+                      type="button"
+                      onClick={() => beginEdit(key, por)}
+                      className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 font-mono text-xs hover:border-blue-500 hover:text-blue-700"
+                    >
+                      edit()
+                    </button>
+                  </div>
                 </div>
                 <p className="text-xs font-mono text-gray-500">org: {por.org || '-'}</p>
-                <DateRange start={por.startDate} end={por.endDate} />
                 <p className="text-sm text-gray-700 whitespace-pre-line">{por.description || '-'}</p>
               </div>
             );
@@ -834,9 +859,12 @@ export default function ResumeDetailPage() {
                     edit()
                   </button>
                 </div>
-                <p className="text-xs font-mono text-gray-500">authors: {pub.authors || '-'}</p>
-                <p className="text-sm text-gray-600">{pub.conference || '-'}{pub.place ? `, ${pub.place}` : ''}</p>
-                <p className="text-xs font-mono text-gray-500">publicationDate: {pub.publicationDate || '-'}</p>
+                <div className="flex flex-col gap-1 text-xs font-mono text-gray-500 break-all">
+                  <span>authors: {pub.authors || '-'}</span>
+                  <span>conference: {pub.conference || '-'}</span>
+                  <span>place: {pub.place || '-'}</span>
+                  <span>publicationDate: {pub.publicationDate || '-'}</span>
+                </div>
                 <p className="text-sm text-gray-700 whitespace-pre-line">{pub.description || '-'}</p>
               </div>
             );
