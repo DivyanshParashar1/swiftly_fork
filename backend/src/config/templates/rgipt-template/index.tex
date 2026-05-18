@@ -26,6 +26,7 @@
 \usepackage{fontawesome5}
 \usepackage{cfr-lm}
 \usepackage[T1]{fontenc}
+\input{glyphtounicode}
 \setlength{\multicolsep}{0pt} 
 \pagestyle{fancy}
 \fancyhf{} % clear all header and footer fields
@@ -120,6 +121,10 @@
 \newcolumntype{L}{>{\raggedright\arraybackslash}X}%
 \newcolumntype{R}{>{\raggedleft\arraybackslash}X}%
 \newcolumntype{C}{>{\centering\arraybackslash}X}%
+
+% Ensure that generate pdf is machine readable/ATS parsable
+\pdfgentounicode=1
+
 %---- End of Packages and Functions ------
 
 \begin{document}

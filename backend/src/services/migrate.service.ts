@@ -178,7 +178,9 @@ function escapeLaTeX(str: string | null | undefined): string {
     .replace(/\{/g, '\\{')
     .replace(/\}/g, '\\}')
     .replace(/~/g, '\\textasciitilde{}')
-    .replace(/\^/g, '\\textasciicircum{}');
+    .replace(/\^/g, '\\textasciicircum{}')
+    .replace(/–/g, '--')    // Unicode en dash → LaTeX --
+    .replace(/—/g, '---');  // Unicode em dash → LaTeX ---
 }
 
 function escapeObject(obj: unknown): unknown {
@@ -206,27 +208,52 @@ const MONTH_ABBR = [
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ];
 
+const MONTH_FULL_NAMES: Record<string, number> = {
+  january: 0, february: 1, march: 2, april: 3, may: 4, june: 5,
+  july: 6, august: 7, september: 8, october: 9, november: 10, december: 11,
+};
+
 /** Keys that hold date values — format them from ISO to "Mon YYYY". */
 const DATE_KEYS = new Set([
   'startDate', 'endDate', 'date', 'publicationDate',
 ]);
 
 /**
- * Convert an ISO date string (2023-08-01) to "Aug 2023".
- * Passes through non-ISO strings unchanged (e.g. "Present", "2024").
+ * Convert a date string to "Mon YYYY" (e.g. "Aug 2023").
+ * Handles: ISO (2023-08-01), full month name (August 2023), abbrev (Aug 2023).
+ * Normalizes "present"/"current"/"now" → "Present".
+ * Passes through year-only strings (e.g. "2025") unchanged.
  */
 function formatDate(val: string | null | undefined): string {
   if (!val) return '';
-  // Match ISO format: YYYY-MM-DD or YYYY-MM
-  const m = val.match(/^(\d{4})-(\d{2})(?:-\d{2})?$/);
-  if (m) {
-    const year = m[1]!;
-    const monthIdx = parseInt(m[2]!, 10) - 1;
+  const trimmed = val.trim();
+
+  // Normalize "Present" variants
+  const lc = trimmed.toLowerCase();
+  if (lc === 'present' || lc === 'current' || lc === 'now' || lc === 'ongoing') {
+    return 'Present';
+  }
+
+  // ISO format: YYYY-MM or YYYY-MM-DD → "Mon YYYY"
+  const isoMatch = trimmed.match(/^(\d{4})-(\d{2})(?:-\d{2})?$/);
+  if (isoMatch) {
+    const year = isoMatch[1]!;
+    const monthIdx = parseInt(isoMatch[2]!, 10) - 1;
     if (monthIdx >= 0 && monthIdx < 12) {
       return `${MONTH_ABBR[monthIdx]} ${year}`;
     }
   }
-  return val; // already formatted ("Present", "2025", "Aug 2023", etc.)
+
+  // Full month name: "January 2023" → "Jan 2023"
+  const fullMatch = trimmed.match(/^([A-Za-z]+)\s+(\d{4})$/);
+  if (fullMatch) {
+    const idx = MONTH_FULL_NAMES[fullMatch[1]!.toLowerCase()];
+    if (idx !== undefined) {
+      return `${MONTH_ABBR[idx]} ${fullMatch[2]}`;
+    }
+  }
+
+  return trimmed; // year-only ("2025"), already formatted ("Aug 2023"), etc.
 }
 
 /** Recursively format date fields in an object tree. */
