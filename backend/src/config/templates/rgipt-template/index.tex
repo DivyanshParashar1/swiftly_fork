@@ -129,11 +129,11 @@
 \includegraphics[width=2cm,clip]{rgipt_logo.png}
 }\parbox{\dimexpr\linewidth-2.8cm\relax}{
 \begin{tabularx}{\linewidth}{L r}
-  \textbf{\LARGE {{{firstName}}} {{{lastName}}}} & {{#if phoneNumber}}+91-{{{phoneNumber}}}{{/if}}\\
-  {{#if roll}}{Roll No.: {{{roll}}}}{{/if}} & {{#if resumeEmail}}\href{mailto:{{{resumeEmail}}}}{{{{resumeEmail}}}}{{/if}} \\
-  {{#if course}}{{{course}}}{{/if}} &  {{#if collegeEmail}}\href{mailto:{{{collegeEmail}}}}{{{{collegeEmail}}}}{{/if}}\\
-  {Computer Science and Design Engineering} &  {{#if github}}\href{{{{github}}}}{Github}{{/if}} \\
-  {Rajiv Gandhi Institute of Petroleum Technology} & {{#if linkedIn}}\href{{{{linkedIn}}}}{LinkedIn}{{/if}}
+  \textbf{\LARGE {{firstName}} {{lastName}} } & {{#if phoneNumber}}+91-{{phoneNumber}}{{/if}}\\
+  {{#if roll}}Roll No.: {{roll}}{{/if}} & {{#if resumeEmail}}\href{mailto:{{resumeEmail}} }{ {{resumeEmail}} }{{/if}} \\
+  {{#if course}}{{course}}{{/if}} &  {{#if collegeEmail}}\href{mailto:{{collegeEmail}} }{ {{collegeEmail}} }{{/if}}\\
+  {Computer Science and Design Engineering} &  {{#if github}}\href{ {{github}} }{Github}{{/if}} \\
+  {Rajiv Gandhi Institute of Petroleum Technology} & {{#if linkedIn}}\href{ {{linkedIn}} }{LinkedIn}{{/if}}
 \end{tabularx}
 }
 

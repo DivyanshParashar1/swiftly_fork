@@ -5,10 +5,10 @@
 
 {{#each experience}}
 \resumeSubheading
-  {{{{companyName}}} {{#if proofLink}}\href{{{{proofLink}}}}{\faLink}{{/if}}}{{{{startDate}}} -- {{{endDate}}}}
-  {{{{position}}}}{{{{location}}}}
+  { {{companyName}} {{#if proofLink}}\href{ {{proofLink}} }{\faLink}{{/if}} }{ {{startDate}} -- {{endDate}} }
+  { {{position}} }{ {{location}} }
   \resumeItemListStart
-    \item {{{{description}}}}
+    \item {{description}}
   \resumeItemListEnd
 {{/each}}
 
