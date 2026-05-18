@@ -130,7 +130,7 @@
 \fontfamily{cmr}\selectfont
 %----------HEADING-----------------
 \parbox{2.35cm}{%
-\includegraphics[width=2cm,clip]{rgipt_logo.png}
+\IfFileExists{rgipt_logo.png}{\includegraphics[width=2cm,clip]{rgipt_logo.png}}{}%
 }\parbox{\dimexpr\linewidth-2.8cm\relax}{
 \begin{tabularx}{\linewidth}{L r}
   \textbf{\LARGE {{firstName}} {{lastName}} } & {{#if phoneNumber}}+91-{{phoneNumber}}{{/if}}\\

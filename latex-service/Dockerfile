@@ -25,6 +25,11 @@ RUN npm install --omit=dev
 # Copy source
 COPY src/ ./src/
 
+# Copy shared template assets (logos etc.). Each compile job stages these
+# into its working dir so templates can reference them by bare filename.
+# It's fine if the dir is empty or absent; copyAssets() handles that.
+COPY assets/ ./assets/
+
 ENV PORT=4000
 ENV NODE_ENV=production
 

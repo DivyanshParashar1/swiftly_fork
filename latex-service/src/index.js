@@ -10,6 +10,11 @@ const crypto = require('crypto');
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+// Shared assets (logos, images) bundled with the service. Any file placed
+// in this directory is copied into each compilation's working dir, so
+// templates can reference them by filename (e.g. \includegraphics{rgipt_logo.png}).
+const ASSETS_DIR = path.resolve(__dirname, '..', 'assets');
+
 // Accept large .tex payloads (some templates can be verbose)
 app.use(express.text({ type: 'text/plain', limit: '5mb' }));
 app.use(express.json({ limit: '5mb' }));
@@ -49,6 +54,10 @@ app.post('/compile', async (req, res) => {
     const pdfFile = path.join(jobDir, 'document.pdf');
 
     await fs.promises.writeFile(texFile, texSource, 'utf-8');
+
+    // Stage shared assets (logos etc.) into the job dir so templates can
+    // reference them by bare filename. Missing dir is fine (no-op).
+    await copyAssets(ASSETS_DIR, jobDir);
 
     // Run pdflatex twice — second pass resolves references/TOC (standard practice)
     await runPdflatex(texFile, jobDir);
@@ -118,6 +127,27 @@ function runPdflatex(texFile, jobDir) {
       }
     );
   });
+}
+
+/**
+ * Copy every file from srcDir into destDir. Skips silently if srcDir doesn't exist.
+ * Used to stage shared assets (logos, images) for templates.
+ */
+async function copyAssets(srcDir, destDir) {
+  try {
+    const entries = await fs.promises.readdir(srcDir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (!entry.isFile()) continue;
+      await fs.promises.copyFile(
+        path.join(srcDir, entry.name),
+        path.join(destDir, entry.name)
+      );
+    }
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      console.warn(`[latex-service] copyAssets warning: ${err.message}`);
+    }
+  }
 }
 
 /** Read the pdflatex .log file if it exists, for error reporting. */
