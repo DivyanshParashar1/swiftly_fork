@@ -527,10 +527,7 @@ function assembleFlatTemplate(
 
 const ALL_SECTION_KEYS = Object.keys(SECTION_FILE_MAP);
 
-function buildDefaultMigrationConfig(
-  resume: ResumeDetailRecord,
-  templateId: string
-): MigrationConfig {
+function buildDefaultMigrationConfig(templateId: string): MigrationConfig {
   const meta = loadTemplateMeta(templateId);
   const sectionKeys = meta?.defaultSectionOrder ?? ALL_SECTION_KEYS;
 
@@ -555,7 +552,7 @@ export function getRenderedLatex(
   templateId: string,
   migrationConfig?: MigrationConfig
 ): string {
-  const config = migrationConfig ?? buildDefaultMigrationConfig(resume, templateId);
+  const config = migrationConfig ?? buildDefaultMigrationConfig(templateId);
 
   const templateDirPath = getTemplateDirPath(templateId);
 
@@ -566,8 +563,8 @@ export function getRenderedLatex(
     const formattedContext = formatDates(escapedContext) as Record<string, unknown>;
     return assembleLaTeX(templateId, config.sections, formattedContext);
   } else {
-    // Flat legacy template (classic, modern, etc.)
-    const template = getTemplateById(templateId);
+    // Flat legacy template (classic, modern, etc.) — validates template exists
+    getTemplateById(templateId);
     const texTemplatePath = path.join(CONFIG_DIR, 'templates', `${templateId}.tex`);
     const rawContext = buildTemplateContext(resume, config.sections);
     const mergedContext = { ...rawContext, ...config.userInputs };

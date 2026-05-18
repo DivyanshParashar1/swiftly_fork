@@ -211,14 +211,6 @@ export const refreshToken = asyncHandler(async (req: AuthRequest, res: Response)
 
     const isTokenValid = await verifyHash(refreshToken, matchedSession.refreshToken)
 
-    const options: CookieOptions = {
-        httpOnly: true,
-        secure: true,
-        // sameSite: "none",
-        // domain: ".swiftly.nakshjoshi.in",
-        path: "/",
-    }
-
     if (!isTokenValid) {
         throw new ApiError(401, "Invalid refresh token, please login again")
     }
