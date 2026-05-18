@@ -1,23 +1,16 @@
 {
-  "title": "title",
   "firstName": "firstName",
-  "middleName": "middleName",
   "lastName": "lastName",
-  "country": "country",
+  "personalPortfolio": "personalPortfolio",
   "phoneNumber": "phoneNumber",
   "resumeEmail": "resumeEmail",
   "linkedIn": "linkedIn",
   "github": "github",
-  "personalPortfolio": "personalPortfolio",
-  "leetCode": "leetCode",
-  "codingProfile2": "codingProfile2",
-  "codingProfile3": "codingProfile3",
-
   "summary": "summary",
-
+  
   "education": {
+    "_db_source": "education",
     "instituteName": "instituteName",
-    "level": "level",
     "startDate": "startDate",
     "endDate": "endDate",
     "location": "location",
@@ -26,49 +19,54 @@
   },
 
   "experience": {
+    "_db_source": "experience",
     "companyName": "companyName",
     "startDate": "startDate",
     "endDate": "endDate",
     "position": "position",
-    "description": "description",
-    "proofLink": "proofLink"
+    "location": "location",
+    "description": "description"
   },
 
   "projects": {
+    "_db_source": "projects",
     "projectName": "projectName",
-    "description": "description",
+    "techStackStr": "techStack",
     "githubLink": "githubLink",
     "liveLink": "liveLink",
-    "startDate": "startDate",
-    "endDate": "endDate"
+    "description": "description"
   },
 
-  "skills": {
-    "name": "name",
-    "category": "category"
+  "skillCategories": {
+    "_db_source": "skills",
+    "category": "category",
+    "skills": "name"
   },
 
   "achievements": {
+    "_db_source": "achievements",
     "title": "title",
-    "org": "org",
     "date": "date",
-    "description": "description"
+    "description": "description",
+    "org": "org"
   },
 
   "pors": {
+    "_db_source": "pors",
     "title": "title",
-    "org": "org",
     "startDate": "startDate",
     "endDate": "endDate",
-    "description": "description"
+    "description": "description",
+    "org": "org"
   },
 
   "publications": {
-    "authors": "authors",
+    "_db_source": "publications",
     "title": "title",
+    "publicationDate": "publicationDate",
+    "authors": "authors",
     "conference": "conference",
     "place": "place",
-    "publicationDate": "publicationDate",
     "description": "description"
   }
 }
