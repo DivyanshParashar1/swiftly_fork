@@ -16,3 +16,4 @@ services:
         limits:
           memory: 1g
           cpus: '1.0'
+          
