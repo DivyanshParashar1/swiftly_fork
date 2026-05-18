@@ -11,7 +11,9 @@
     "tsx": "^4.22.0"
   },
   "scripts": {
-    "dev": "bun --env-file=.env --watch src/index.ts"
+    "dev": "bun --env-file=.env --watch src/index.ts",
+    "build": "bunx prisma generate && bunx prisma migrate deploy",
+    "start": "bun src/index.ts"
   },
   "peerDependencies": {
     "typescript": "^5.9.3"
