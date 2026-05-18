@@ -1,9 +1,7 @@
-%-----------INVOLVEMENT---------------
-\section{Achievements and Positions of Responsibility}
+%-----------POSITIONS OF RESPONSIBILITY---------------
+\section{Positions of Responsibility}
     \resumeSubHeadingListStart
-        \resumeSubheading{Training and Placement Student Coordinator}{2024 - Present}{Part of the Career Development Cell under TnP, RGIPT for Placement and Internships Coordination.}{}
-
-        \resumeSubheading{Finalists and Internship Offer}{2025}{Finalist(from 250+ Teams), KodeKurrent Hackathon 2025; converted to paid internship(from 40+ People).}{}
-            
-        
+        {{#each pors}}
+        \resumeSubheading{ {{title}} }{ {{startDate}} -- {{endDate}} }{ {{description}} }{ {{org}} }
+        {{/each}}
     \resumeSubHeadingListEnd

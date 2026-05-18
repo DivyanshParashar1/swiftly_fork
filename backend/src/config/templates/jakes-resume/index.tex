@@ -130,18 +130,46 @@
 % \end{tabular*}
 
 \begin{center}
-    {\Huge \scshape Nakshatra Joshi} \\ \vspace{1pt}
-    \href{https://nakshjoshi.in}{nakshjoshi.in}\\ \vspace{1pt}
-    \small \raisebox{-0.1\height}\faPhone\ +91 7008350087 ~ \href{mailto:connect.nakshjoshi@gmail.com}{\raisebox{-0.2\height}\faEnvelope\  \underline{connect.nakshjoshi@gmail.com}} ~ 
-    \href{https://linkedin.com/in/nakshjoshi/}{\raisebox{-0.2\height}\faLinkedin\ \underline{linkedin.com/in/nakshjoshi}}  ~
-    \href{https://github.com/nakshjoshi/}{\raisebox{-0.2\height}\faGithub\ \underline{github.com/nakshjoshi}}
+    {\Huge \scshape {{firstName}} {{lastName}}} \\ \vspace{1pt}
+    {{#if personalPortfolio}}\href{ {{personalPortfolio}} }{Portfolio}\\ \vspace{1pt}{{/if}}
+    \small 
+    {{#if phoneNumber}}\raisebox{-0.1\height}\faPhone\ {{phoneNumber}} ~ {{/if}}
+    {{#if resumeEmail}}\href{mailto:{{resumeEmail}}}{\raisebox{-0.2\height}\faEnvelope\  \underline{ {{resumeEmail}} }} ~ {{/if}}
+    {{#if linkedIn}}\href{ {{linkedIn}} }{\raisebox{-0.2\height}\faLinkedin\ \underline{LinkedIn}}  ~ {{/if}}
+    {{#if github}}\href{ {{github}} }{\raisebox{-0.2\height}\faGithub\ \underline{GitHub}}{{/if}}
     \vspace{-8pt}
 \end{center}
 
+{{#if summary}}
+\input{section-modules/summary}
+{{/if}}
 
+{{#if education.length}}
+\input{section-modules/education}
+{{/if}}
 
+{{#if experience.length}}
+\input{section-modules/experience}
+{{/if}}
 
+{{#if projects.length}}
+\input{section-modules/projects}
+{{/if}}
 
+{{#if skillCategories.length}}
+\input{section-modules/skills}
+{{/if}}
 
+{{#if achievements.length}}
+\input{section-modules/achievements}
+{{/if}}
+
+{{#if pors.length}}
+\input{section-modules/por}
+{{/if}}
+
+{{#if publications.length}}
+\input{section-modules/publications}
+{{/if}}
 
 \end{document}

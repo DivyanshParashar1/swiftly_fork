@@ -1,34 +1,13 @@
-
 %-----------EXPERIENCE-----------
 \section{Experience}
   \resumeSubHeadingListStart
-
+    {{#each experience}}
     \resumeSubheading
-      {CargoFL (Innoctive Technologies Pvt. Ltd.)}{May 2026 – Present}
-      {Software Developer Intern}{Pune, Maharashtra - Hybrid}
+      { {{companyName}} }{ {{startDate}} -- {{endDate}} }
+      { {{position}} }{ {{location}} }
       \resumeItemListStart
-        \resumeItem{Building a standalone \textbf{full-stack agent application} with \textbf{Hono} and \textbf{React}, owning end-to-end flows across UI state, REST API contracts, tool-call orchestration, inter-service communication, environment configuration, and \textbf{Turborepo/pnpm} workspace boundaries.}
-        
-    \resumeItemListEnd
-
-    \resumeSubheading
-      {Prodigal AI | \href{https://drive.google.com/file/d/1tpTMo591Xb3NxkapR5-QZqC8_xB__pVR/view?usp=sharing}{\faLink}}{Jun 2025 – Aug 2025}
-      {AI Developer Intern}{Delhi - Remote}
-      \resumeItemListStart
-        \resumeItem{Engineered \textbf{GenAI/ML backend architectures} with human-in-the-loop workflows and deployed \textbf{3+ production-grade pipelines} using \textbf{Docker, FastAPI}, and \textbf{AWS}, improving system throughput by \textbf{10\%}.}
-
-\resumeItem{Implemented \textbf{MLOps/AIOps} lifecycle automation with \textbf{Airflow} and \textbf{MLflow/DagsHub}, and built real-time, event-driven data streaming using \textbf{Apache Kafka}, reducing development iteration time by \textbf{15\%}.}
-
-\resumeItem{Collaborated in an \textbf{Agile/Scrum} environment to define requirements, manage sprint tasks, and deliver features with strong attention to detail, demonstrating \textbf{teamwork}, ownership, and clear technical communication.}
-
-
-
-        
-
-        
+        \resumeItem{ {{description}} }
       \resumeItemListEnd
-
-    
-    
+    {{/each}}
   \resumeSubHeadingListEnd
 \vspace{-16pt}

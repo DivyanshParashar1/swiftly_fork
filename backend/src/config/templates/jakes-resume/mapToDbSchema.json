@@ -1,0 +1,74 @@
+{
+  "title": "title",
+  "firstName": "firstName",
+  "middleName": "middleName",
+  "lastName": "lastName",
+  "country": "country",
+  "phoneNumber": "phoneNumber",
+  "resumeEmail": "resumeEmail",
+  "linkedIn": "linkedIn",
+  "github": "github",
+  "personalPortfolio": "personalPortfolio",
+  "leetCode": "leetCode",
+  "codingProfile2": "codingProfile2",
+  "codingProfile3": "codingProfile3",
+
+  "summary": "summary",
+
+  "education": {
+    "instituteName": "instituteName",
+    "level": "level",
+    "startDate": "startDate",
+    "endDate": "endDate",
+    "location": "location",
+    "degree": "degree",
+    "branch": "branch"
+  },
+
+  "experience": {
+    "companyName": "companyName",
+    "startDate": "startDate",
+    "endDate": "endDate",
+    "position": "position",
+    "description": "description",
+    "proofLink": "proofLink"
+  },
+
+  "projects": {
+    "projectName": "projectName",
+    "description": "description",
+    "githubLink": "githubLink",
+    "liveLink": "liveLink",
+    "startDate": "startDate",
+    "endDate": "endDate"
+  },
+
+  "skills": {
+    "name": "name",
+    "category": "category"
+  },
+
+  "achievements": {
+    "title": "title",
+    "org": "org",
+    "date": "date",
+    "description": "description"
+  },
+
+  "pors": {
+    "title": "title",
+    "org": "org",
+    "startDate": "startDate",
+    "endDate": "endDate",
+    "description": "description"
+  },
+
+  "publications": {
+    "authors": "authors",
+    "title": "title",
+    "conference": "conference",
+    "place": "place",
+    "publicationDate": "publicationDate",
+    "description": "description"
+  }
+}

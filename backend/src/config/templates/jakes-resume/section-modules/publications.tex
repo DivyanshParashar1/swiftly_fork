@@ -1,0 +1,10 @@
+%-----------PUBLICATIONS---------------
+\section{Publications}
+    \resumeSubHeadingListStart
+        {{#each publications}}
+        \resumeSubheading{ {{title}} }{ {{publicationDate}} }{ {{authors}} - {{conference}} }{ {{place}} }
+        \resumeItemListStart
+            \resumeItem{ {{description}} }
+        \resumeItemListEnd
+        {{/each}}
+    \resumeSubHeadingListEnd
