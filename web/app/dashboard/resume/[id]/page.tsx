@@ -67,12 +67,16 @@ function EmptyState({ label }: { label: string }) {
   );
 }
 
-function DateRange({ start, end }: { start?: string | null; end?: string | null }) {
-  if (!start && !end) return null;
+function DateRange({ start, end, single }: { start?: string | null; end?: string | null; single?: string | null }) {
+  if (!start && !end && !single) return null;
+  let text = single ? single : `${start || '?'} ${end ? `→ ${end}` : '→ present'}`;
   return (
-    <span className="text-xs font-mono text-gray-500">
-      {start || '?'} {end ? `→ ${end}` : '→ present'}
-    </span>
+    <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-blue-50 border border-blue-100 text-[11px] font-mono text-blue-600">
+      <svg className="w-3.5 h-3.5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+      <span>{text}</span>
+    </div>
   );
 }
 
@@ -414,10 +418,10 @@ export default function ResumeDetailPage() {
                     </button>
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs font-mono text-gray-500">
-                  <span>level: {edu.level || '-'}</span>
-                  <span>location: {edu.location || '-'}</span>
-                  <span>grade: {edu.grade || '-'}</span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                  <div><span className={labelClass}>level</span><p className="text-sm text-gray-700">{edu.level || '-'}</p></div>
+                  <div><span className={labelClass}>location</span><p className="text-sm text-gray-700">{edu.location || '-'}</p></div>
+                  <div><span className={labelClass}>grade</span><p className="text-sm text-gray-700">{edu.grade || '-'}</p></div>
                 </div>
               </div>
             );
@@ -497,12 +501,15 @@ export default function ResumeDetailPage() {
                     </button>
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs font-mono text-gray-500 break-all">
-                  <span>type: {exp.type || '-'}</span>
-                  <span>location: {exp.location || '-'}</span>
-                  <span>proofLink: <ExternalLink href={exp.proofLink} /></span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div><span className={labelClass}>type</span><p className="text-sm text-gray-700">{exp.type || '-'}</p></div>
+                  <div><span className={labelClass}>location</span><p className="text-sm text-gray-700">{exp.location || '-'}</p></div>
+                  <div className="sm:col-span-2"><span className={labelClass}>proofLink</span><p className="text-sm text-gray-700 break-all"><ExternalLink href={exp.proofLink} /></p></div>
+                  <div className="sm:col-span-2">
+                    <span className={labelClass}>description</span>
+                    <p className="text-sm text-gray-700 whitespace-pre-line mt-1">{exp.description || '-'}</p>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-700 whitespace-pre-line">{exp.description || '-'}</p>
               </div>
             );
           }
@@ -586,12 +593,15 @@ export default function ResumeDetailPage() {
                     </button>
                   </div>
                 </div>
-                <div className="flex flex-col gap-1 text-xs font-mono text-gray-500 break-all">
-                  <span>techStack: {(proj.techStack || []).join(', ') || '-'}</span>
-                  <span>githubLink: <ExternalLink href={proj.githubLink} /></span>
-                  <span>liveLink: <ExternalLink href={proj.liveLink} /></span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div className="sm:col-span-2"><span className={labelClass}>techStack</span><p className="text-sm text-gray-700 break-all">{(proj.techStack || []).join(', ') || '-'}</p></div>
+                  <div><span className={labelClass}>githubLink</span><p className="text-sm text-gray-700 break-all"><ExternalLink href={proj.githubLink} /></p></div>
+                  <div><span className={labelClass}>liveLink</span><p className="text-sm text-gray-700 break-all"><ExternalLink href={proj.liveLink} /></p></div>
+                  <div className="sm:col-span-2">
+                    <span className={labelClass}>description</span>
+                    <p className="text-sm text-gray-700 whitespace-pre-line mt-1">{proj.description || '-'}</p>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-700 whitespace-pre-line">{proj.description || '-'}</p>
               </div>
             );
           }
@@ -652,8 +662,8 @@ export default function ResumeDetailPage() {
             return (
               <div key={skill.id} className="bg-white rounded-xl border-2 border-gray-200 p-4 flex items-center justify-between gap-3 hover:border-blue-300 transition-colors">
                 <div>
-                  <p className="text-gray-900 font-medium">{skill.name || '-'}</p>
-                  <p className="text-xs font-mono text-gray-500">{skill.category || 'Other'}</p>
+                  <h4 className="font-semibold text-gray-900">{skill.name || '-'}</h4>
+                  <p className="text-xs font-mono text-blue-600 mt-0.5">{skill.category || 'Other'}</p>
                 </div>
                 <button
                   type="button"
@@ -713,19 +723,24 @@ export default function ResumeDetailPage() {
               <div key={ach.id} className="bg-white rounded-xl border-2 border-gray-200 p-5 space-y-2 hover:border-blue-300 transition-colors">
                 <div className="flex justify-between gap-2">
                   <h4 className="font-semibold text-gray-900">{ach.title || 'Achievement'}</h4>
-                  <button
-                    type="button"
-                    onClick={() => beginEdit(key, ach)}
-                    className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 font-mono text-xs hover:border-blue-500 hover:text-blue-700"
-                  >
-                    edit()
-                  </button>
+                  <div className="flex items-start gap-2">
+                    <DateRange single={ach.date} />
+                    <button
+                      type="button"
+                      onClick={() => beginEdit(key, ach)}
+                      className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 font-mono text-xs hover:border-blue-500 hover:text-blue-700"
+                    >
+                      edit()
+                    </button>
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs font-mono text-gray-500">
-                  <span>org: {ach.org || '-'}</span>
-                  <span>date: {ach.date || '-'}</span>
+                <div className="grid grid-cols-1 gap-4 pt-2">
+                  <div><span className={labelClass}>org</span><p className="text-sm text-gray-700">{ach.org || '-'}</p></div>
+                  <div>
+                    <span className={labelClass}>description</span>
+                    <p className="text-sm text-gray-700 whitespace-pre-line mt-1">{ach.description || '-'}</p>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-700 whitespace-pre-line">{ach.description || '-'}</p>
               </div>
             );
           }
@@ -792,8 +807,13 @@ export default function ResumeDetailPage() {
                     </button>
                   </div>
                 </div>
-                <p className="text-xs font-mono text-gray-500">org: {por.org || '-'}</p>
-                <p className="text-sm text-gray-700 whitespace-pre-line">{por.description || '-'}</p>
+                <div className="grid grid-cols-1 gap-4 pt-2">
+                  <div><span className={labelClass}>org</span><p className="text-sm text-gray-700">{por.org || '-'}</p></div>
+                  <div>
+                    <span className={labelClass}>description</span>
+                    <p className="text-sm text-gray-700 whitespace-pre-line mt-1">{por.description || '-'}</p>
+                  </div>
+                </div>
               </div>
             );
           }
@@ -851,21 +871,26 @@ export default function ResumeDetailPage() {
               <div key={pub.id} className="bg-white rounded-xl border-2 border-gray-200 p-5 space-y-2 hover:border-blue-300 transition-colors">
                 <div className="flex justify-between gap-2">
                   <h4 className="font-semibold text-gray-900">{pub.title || 'Publication'}</h4>
-                  <button
-                    type="button"
-                    onClick={() => beginEdit(key, pub)}
-                    className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 font-mono text-xs hover:border-blue-500 hover:text-blue-700"
-                  >
-                    edit()
-                  </button>
+                  <div className="flex items-start gap-2">
+                    <DateRange single={pub.publicationDate} />
+                    <button
+                      type="button"
+                      onClick={() => beginEdit(key, pub)}
+                      className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 font-mono text-xs hover:border-blue-500 hover:text-blue-700"
+                    >
+                      edit()
+                    </button>
+                  </div>
                 </div>
-                <div className="flex flex-col gap-1 text-xs font-mono text-gray-500 break-all">
-                  <span>authors: {pub.authors || '-'}</span>
-                  <span>conference: {pub.conference || '-'}</span>
-                  <span>place: {pub.place || '-'}</span>
-                  <span>publicationDate: {pub.publicationDate || '-'}</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div className="sm:col-span-2"><span className={labelClass}>authors</span><p className="text-sm text-gray-700">{pub.authors || '-'}</p></div>
+                  <div><span className={labelClass}>conference</span><p className="text-sm text-gray-700">{pub.conference || '-'}</p></div>
+                  <div><span className={labelClass}>place</span><p className="text-sm text-gray-700">{pub.place || '-'}</p></div>
+                  <div className="sm:col-span-2">
+                    <span className={labelClass}>description</span>
+                    <p className="text-sm text-gray-700 whitespace-pre-line mt-1">{pub.description || '-'}</p>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-700 whitespace-pre-line">{pub.description || '-'}</p>
               </div>
             );
           }
