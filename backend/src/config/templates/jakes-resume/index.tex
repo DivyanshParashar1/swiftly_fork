@@ -131,12 +131,10 @@
 
 \begin{center}
     {\Huge \scshape {{firstName}} {{lastName}} } \\ \vspace{1pt}
-    {{#if personalPortfolio}}\href{ {{personalPortfolio}} }{Portfolio}\\ \vspace{1pt}{{/if}}
-    \small 
-    {{#if phoneNumber}}\raisebox{-0.1\height}\faPhone\ {{phoneNumber}} ~ {{/if}}
-    {{#if resumeEmail}}\href{mailto:{{resumeEmail}}}{\raisebox{-0.2\height}\faEnvelope\  \underline{ {{resumeEmail}} }} ~ {{/if}}
-    {{#if linkedIn}}\href{ {{linkedIn}} }{\raisebox{-0.2\height}\faLinkedin\ \underline{LinkedIn}}  ~ {{/if}}
-    {{#if github}}\href{ {{github}} }{\raisebox{-0.2\height}\faGithub\ \underline{GitHub}}{{/if}}
+    {{#if personalPortfolio}}\href{ {{personalPortfolio}} }{ {{portfolioDisplay}} }\\ \vspace{1pt}{{/if}}
+    \small \raisebox{-0.1\height}\faPhone\ {{phoneNumber}} ~ \href{mailto:{{resumeEmail}} }{\raisebox{-0.2\height}\faEnvelope\  \underline{ {{resumeEmail}} } } ~ 
+    {{#if linkedIn}}\href{ {{linkedIn}} }{\raisebox{-0.2\height}\faLinkedin\ \underline{ {{linkedInDisplay}} } }  ~{{/if}}
+    {{#if github}}\href{ {{github}} }{\raisebox{-0.2\height}\faGithub\ \underline{ {{githubDisplay}} } }{{/if}}
     \vspace{-8pt}
 \end{center}
 

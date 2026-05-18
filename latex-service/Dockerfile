@@ -4,12 +4,14 @@ FROM node:20-bookworm-slim
 
 # Install texlive packages required for our resume templates:
 #   texlive-latex-base       → pdflatex, core packages (geometry, inputenc, fontenc, parskip)
-#   texlive-latex-extra      → titlesec, enumitem, microtype, tabularx, array, xcolor, hyperref
+#   texlive-latex-extra      → titlesec, enumitem, microtype, tabularx, array, xcolor, hyperref, tcolorbox
 #   texlive-fonts-recommended → standard fonts (needed by most templates)
+#   texlive-fonts-extra      → fontawesome5, cfr-lm, marvosym (needed by jakes-resume & rgipt-template)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     texlive-latex-base \
     texlive-latex-extra \
     texlive-fonts-recommended \
+    texlive-fonts-extra \
     lmodern \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*

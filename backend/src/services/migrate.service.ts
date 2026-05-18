@@ -158,6 +158,14 @@ const SECTION_FILE_MAP: Record<string, string> = {
 
 // ─── LaTeX escape helpers ─────────────────────────────────────────────────────
 
+/** Keys whose values are URLs — must NOT be LaTeX-escaped (they go inside \href{}). */
+const URL_KEYS = new Set([
+  'linkedIn', 'github', 'personalPortfolio', 'leetCode',
+  'codingProfile2', 'codingProfile3', 'resumeEmail',
+  'linkedInDisplay', 'githubDisplay', 'portfolioDisplay',
+  'proofLink', 'githubLink', 'liveLink',
+]);
+
 function escapeLaTeX(str: string | null | undefined): string {
   if (!str) return '';
   return str
@@ -179,7 +187,59 @@ function escapeObject(obj: unknown): unknown {
   if (obj && typeof obj === 'object') {
     const out: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
-      out[k] = escapeObject(v);
+      // Don't escape URL fields — they go inside \href{} which needs raw URLs
+      if (URL_KEYS.has(k)) {
+        out[k] = v;
+      } else {
+        out[k] = escapeObject(v);
+      }
+    }
+    return out;
+  }
+  return obj;
+}
+
+// ─── Date formatting ──────────────────────────────────────────────────────────
+
+const MONTH_ABBR = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
+
+/** Keys that hold date values — format them from ISO to "Mon YYYY". */
+const DATE_KEYS = new Set([
+  'startDate', 'endDate', 'date', 'publicationDate',
+]);
+
+/**
+ * Convert an ISO date string (2023-08-01) to "Aug 2023".
+ * Passes through non-ISO strings unchanged (e.g. "Present", "2024").
+ */
+function formatDate(val: string | null | undefined): string {
+  if (!val) return '';
+  // Match ISO format: YYYY-MM-DD or YYYY-MM
+  const m = val.match(/^(\d{4})-(\d{2})(?:-\d{2})?$/);
+  if (m) {
+    const year = m[1]!;
+    const monthIdx = parseInt(m[2]!, 10) - 1;
+    if (monthIdx >= 0 && monthIdx < 12) {
+      return `${MONTH_ABBR[monthIdx]} ${year}`;
+    }
+  }
+  return val; // already formatted ("Present", "2025", "Aug 2023", etc.)
+}
+
+/** Recursively format date fields in an object tree. */
+function formatDates(obj: unknown): unknown {
+  if (Array.isArray(obj)) return obj.map(formatDates);
+  if (obj && typeof obj === 'object') {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
+      if (DATE_KEYS.has(k) && typeof v === 'string') {
+        out[k] = formatDate(v);
+      } else {
+        out[k] = formatDates(v);
+      }
     }
     return out;
   }
@@ -234,6 +294,12 @@ function buildTemplateContext(
     techStackStr: (p.techStack || []).join(', '),
   }));
 
+  /** Strip protocol + trailing slash from a URL for display in templates. */
+  function stripUrl(url: string | null | undefined): string {
+    if (!url) return '';
+    return url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  }
+
   return {
     // Personal info
     firstName: resume.firstName,
@@ -245,6 +311,9 @@ function buildTemplateContext(
     linkedIn: resume.linkedIn,
     github: resume.github,
     personalPortfolio: resume.personalPortfolio,
+    linkedInDisplay: stripUrl(resume.linkedIn),
+    githubDisplay: stripUrl(resume.github),
+    portfolioDisplay: stripUrl(resume.personalPortfolio),
     leetCode: resume.leetCode,
     codingProfile2: resume.codingProfile2,
     codingProfile3: resume.codingProfile3,
@@ -260,6 +329,7 @@ function buildTemplateContext(
     pors: filteredPors,
     publications: filteredPublications,
     skillCategories: groupSkills(filteredSkills),
+    skillsFlat: filteredSkills.map((s) => s.name || '').filter(Boolean).join(', '),
   };
 }
 
@@ -440,7 +510,8 @@ export function getRenderedLatex(
     // Modular template (directory-based)
     const rawContext = adaptContext(resume, config.sections, config.userInputs, templateId);
     const escapedContext = escapeObject(rawContext) as Record<string, unknown>;
-    return assembleLaTeX(templateId, config.sections, escapedContext);
+    const formattedContext = formatDates(escapedContext) as Record<string, unknown>;
+    return assembleLaTeX(templateId, config.sections, formattedContext);
   } else {
     // Flat legacy template (classic, modern, etc.)
     const template = getTemplateById(templateId);
@@ -448,7 +519,8 @@ export function getRenderedLatex(
     const rawContext = buildTemplateContext(resume, config.sections);
     const mergedContext = { ...rawContext, ...config.userInputs };
     const escapedContext = escapeObject(mergedContext) as Record<string, unknown>;
-    return assembleFlatTemplate(texTemplatePath, escapedContext);
+    const formattedContext = formatDates(escapedContext) as Record<string, unknown>;
+    return assembleFlatTemplate(texTemplatePath, formattedContext);
   }
 }
 
