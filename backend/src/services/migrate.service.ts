@@ -221,11 +221,14 @@ export async function migrateResumeToPdf(
   if (!response.ok) {
     let details = 'Unknown compilation error';
     try {
-      const errBody = (await response.json()) as { error?: string; details?: string };
-      details = errBody.details || errBody.error || details;
-    } catch {
-      details = (await response.text()).slice(0, 500);
-    }
+      const rawText = await response.text();
+      try {
+        const errBody = JSON.parse(rawText) as { error?: string; details?: string };
+        details = errBody.details || errBody.error || details;
+      } catch {
+        details = rawText.slice(0, 500);
+      }
+    } catch { /* body read failed */ }
     throw new ApiError(422, `LaTeX compilation failed:\n${details}`);
   }
 
