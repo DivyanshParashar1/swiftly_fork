@@ -73,6 +73,12 @@ export default function Footer() {
                   Get Started
                 </Link>
               </li>
+              <li>
+                <Link href="/privacy-policy" className="text-gray-400 hover:text-blue-400 text-sm transition-colors flex items-center gap-2 group">
+                  <span className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                  Privacy Policy
+                </Link>
+              </li>
             </ul>
           </div>
 
