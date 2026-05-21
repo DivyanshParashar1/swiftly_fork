@@ -4,7 +4,7 @@ import { defineConfig } from 'wxt';
 export default defineConfig({
   modules: ['@wxt-dev/module-react'],
   manifest:{
-    name: 'Swiftly Extension',
+    name: 'Swiftly – Job Application Autofill',
     short_name: 'Swiftly',
     description: 'Autofill job applications using your selected Swiftly resume.',
     icons: {
