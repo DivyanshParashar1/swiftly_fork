@@ -37,9 +37,9 @@ export class ResumeService{
                 codingProfile2:jsonDataResume.codingProfile2,
                 codingProfile3:jsonDataResume.codingProfile3,
                 summary:jsonDataResume.summary,
-                dateOfBirth:undefined,
-                address:undefined,
-                yearOfGraduation:undefined,
+                dateOfBirth:jsonDataResume.dateOfBirth ?? undefined,
+                address:jsonDataResume.address ?? undefined,
+                yearOfGraduation:jsonDataResume.yearOfGraduation ?? undefined,
 
                 education: jsonDataResume.education?.length
                   ? { create: jsonDataResume.education }

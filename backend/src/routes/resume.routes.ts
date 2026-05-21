@@ -1,5 +1,4 @@
 import { Router } from "express";
-import multer from "multer";
 import { upload } from "../middlewares/multer.middleware";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { uploadAndParseResume, createResume } from "../controllers/resumeUpload.controller";
