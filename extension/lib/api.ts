@@ -136,7 +136,7 @@ export interface AutofillMappingResponse {
 
 const PRODUCTION_WEB_BASE_URL = 'https://swiftly.nakshjoshi.in';
 
-const PRODUCTION_API_BASE_URL = 'https://apiv2.nakshjoshi.in';
+const PRODUCTION_API_BASE_URL = 'https://apiv3.swiftly.nakshjoshi.in';
 const EXTENSION_PROFILE_STORAGE_KEY = 'swiftly.extension.profile';
 
 const getCookiesByName = async (name: string): Promise<chrome.cookies.Cookie[]> => {
