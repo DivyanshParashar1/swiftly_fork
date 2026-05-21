@@ -344,12 +344,20 @@ export default function MigrateResumePage() {
             {resumes.length === 0 ? (
               <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center">
                 <p className="font-mono text-gray-500 text-sm">// no resumes in your account</p>
-                <Link
-                  href="/upload-resume"
-                  className="inline-block mt-4 px-5 py-2 bg-black text-white rounded-lg hover:bg-blue-600 transition-all font-mono text-sm border-2 border-black"
-                >
-                  uploadResume()
-                </Link>
+                <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
+                  <Link
+                    href="/upload-resume"
+                    className="inline-block px-5 py-2 bg-black text-white rounded-lg hover:bg-blue-600 transition-all font-mono text-sm border-2 border-black"
+                  >
+                    uploadResume()
+                  </Link>
+                  <Link
+                    href="/create-resume"
+                    className="inline-block px-5 py-2 bg-white text-gray-900 rounded-lg hover:bg-indigo-600 hover:text-white transition-all font-mono text-sm border-2 border-gray-300 hover:border-indigo-600"
+                  >
+                    + createResume()
+                  </Link>
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -149,6 +149,96 @@ export interface ResumeDetailRecord extends ResumeRecord {
   publications: PublicationRecord[];
 }
 
+// ── Create Resume payload (sent directly to backend, no AI) ───────────────────
+
+export interface CreateEducationEntry {
+  instituteName?: string | null;
+  level?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  location?: string | null;
+  degree?: string | null;
+  branch?: string | null;
+  grade?: string | null;
+}
+
+export interface CreateExperienceEntry {
+  companyName?: string | null;
+  location?: string | null;
+  type: string;
+  startDate?: string | null;
+  endDate?: string | null;
+  position?: string | null;
+  description?: string | null;
+  proofLink?: string | null;
+}
+
+export interface CreateProjectEntry {
+  projectName?: string | null;
+  techStack?: string[];
+  description?: string | null;
+  githubLink?: string | null;
+  liveLink?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+}
+
+export interface CreateSkillEntry {
+  name?: string | null;
+  category?: string | null;
+}
+
+export interface CreateAchievementEntry {
+  title?: string | null;
+  org?: string | null;
+  date?: string | null;
+  description?: string | null;
+}
+
+export interface CreatePorEntry {
+  title?: string | null;
+  org?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  description?: string | null;
+}
+
+export interface CreatePublicationEntry {
+  authors?: string | null;
+  title?: string | null;
+  conference?: string | null;
+  place?: string | null;
+  publicationDate?: string | null;
+  description?: string | null;
+}
+
+export interface CreateResumePayload {
+  title?: string | null;
+  firstName?: string | null;
+  middleName?: string | null;
+  lastName?: string | null;
+  country?: string | null;
+  phoneNumber?: string | null;
+  resumeEmail?: string | null;
+  dateOfBirth?: string | null;
+  linkedIn?: string | null;
+  github?: string | null;
+  personalPortfolio?: string | null;
+  leetCode?: string | null;
+  codingProfile2?: string | null;
+  codingProfile3?: string | null;
+  summary?: string | null;
+  address?: string | null;
+  yearOfGraduation?: number | null;
+  education?: CreateEducationEntry[];
+  experience?: CreateExperienceEntry[];
+  projects?: CreateProjectEntry[];
+  skills?: CreateSkillEntry[];
+  achievements?: CreateAchievementEntry[];
+  pors?: CreatePorEntry[];
+  publications?: CreatePublicationEntry[];
+}
+
 export interface UpdateResumePayload {
   id: string;
   title?: string | null;
@@ -408,6 +498,15 @@ export const resumeApi = {
     try {
       const response = await apiClient.delete<ApiResponse<ResumeRecord>>(`/api/v1/fetch/deleteResumeById/${resumeId}`);
       return toApiResponse<ResumeRecord>(response.data, 'Resume deleted successfully');
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
+
+  createResume: async (payload: CreateResumePayload): Promise<ApiResponse<ResumeRecord>> => {
+    try {
+      const response = await apiClient.post<ApiResponse<ResumeRecord>>('/api/v1/resume/createResume', payload);
+      return toApiResponse<ResumeRecord>(response.data, 'Resume created successfully');
     } catch (error) {
       handleAxiosError(error);
     }
