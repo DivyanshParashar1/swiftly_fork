@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSnackbar } from 'notistack';
-import { ApiError, resumeApi, type CreateResumePayload, type CreateEducationEntry, type CreateExperienceEntry, type CreateProjectEntry, type CreateSkillEntry, type CreateAchievementEntry, type CreatePorEntry, type CreatePublicationEntry } from '@/lib/api';
+import { ApiError, resumeApi, type CreateResumePayload, type CreateEducationEntry, type CreateExperienceEntry, type CreateSkillEntry, type CreateAchievementEntry, type CreatePorEntry, type CreatePublicationEntry } from '@/lib/api';
 
 // ─── Shared style tokens ──────────────────────────────────────────────────────
 const inputCls = 'w-full px-3 py-2 rounded-lg border-2 border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 text-sm';
@@ -59,7 +59,19 @@ function ListItem({ index, onRemove, children }: { index: number; onRemove: () =
 // ─── Default factories ────────────────────────────────────────────────────────
 const newEdu = (): CreateEducationEntry & Record<string,string> => ({ instituteName:'', level:'', degree:'', branch:'', startDate:'', endDate:'', location:'', grade:'' });
 const newExp = (): CreateExperienceEntry & Record<string,string> => ({ companyName:'', position:'', location:'', type:'INTERNSHIP', startDate:'', endDate:'', proofLink:'', description:'' });
-const newProj = (): CreateProjectEntry & { techStack: string } => ({ projectName:'', techStack:'', description:'', githubLink:'', liveLink:'', startDate:'', endDate:'' });
+
+// ProjRow uses techStack as a plain comma-separated string for the form input
+interface ProjRow {
+  projectName: string;
+  techStack: string;
+  description: string;
+  githubLink: string;
+  liveLink: string;
+  startDate: string;
+  endDate: string;
+}
+const newProj = (): ProjRow => ({ projectName:'', techStack:'', description:'', githubLink:'', liveLink:'', startDate:'', endDate:'' });
+
 const newSkill = (): CreateSkillEntry & Record<string,string> => ({ name:'', category:'' });
 const newAch = (): CreateAchievementEntry & Record<string,string> => ({ title:'', org:'', date:'', description:'' });
 const newPor = (): CreatePorEntry & Record<string,string> => ({ title:'', org:'', startDate:'', endDate:'', description:'' });
@@ -85,7 +97,6 @@ export default function CreateResumePage() {
   // Lists
   type EduRow = CreateEducationEntry & Record<string,string>;
   type ExpRow = CreateExperienceEntry & Record<string,string>;
-  type ProjRow = CreateProjectEntry & { techStack: string };
   type SkillRow = CreateSkillEntry & Record<string,string>;
   type AchRow = CreateAchievementEntry & Record<string,string>;
   type PorRow = CreatePorEntry & Record<string,string>;
