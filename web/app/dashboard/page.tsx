@@ -130,6 +130,7 @@ export default function DashboardPage() {
                 <span className="text-indigo-500 mr-1 group-hover:text-white">+</span>
                 createResume()
               </Link>
+              {/* Logout button moved to navbar dropdown — uncomment below if needed here
               <button
                 type="button"
                 onClick={handleLogout}
@@ -138,6 +139,7 @@ export default function DashboardPage() {
               >
                 {isLoggingOut ? 'loggingOut...' : 'logout()'}
               </button>
+              */}
             </div>
           </div>
         </section>

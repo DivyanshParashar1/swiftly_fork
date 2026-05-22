@@ -2,14 +2,21 @@
 
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSnackbar } from 'notistack';
+import { ApiError, authApi } from '@/lib/api';
 import { AUTH_USER_CHANGED_EVENT, clearAuthUser, getAuthUser } from '@/lib/authSession';
 import type { AuthUser } from '@/lib/api';
 
 export default function Navbar() {
+  const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
+
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   
 
@@ -54,10 +61,25 @@ export default function Navbar() {
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
-  const handleLogout = () => {
-    clearAuthUser();
-    setIsUserMenuOpen(false);
-    closeMobileMenu();
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await authApi.logout();
+      clearAuthUser();
+      window.postMessage({ type: 'USER_LOGGED_OUT' }, '*');
+      enqueueSnackbar('Logged out successfully', { variant: 'success' });
+      setIsUserMenuOpen(false);
+      closeMobileMenu();
+      router.push('/signin');
+    } catch (error) {
+      if (error instanceof ApiError) {
+        enqueueSnackbar(error.message, { variant: 'error' });
+      } else {
+        enqueueSnackbar('Logout failed. Try again.', { variant: 'error' });
+      }
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   useEffect(() => {
@@ -169,13 +191,14 @@ export default function Navbar() {
                     <div className="my-1 border-t border-gray-100" />
                     <button
                       type="button"
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-mono text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
+                      onClick={() => void handleLogout()}
+                      disabled={isLoggingOut}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-mono text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
                       </svg>
-                      logout()
+                      {isLoggingOut ? 'loggingOut...' : 'logout()'}
                     </button>
                   </div>
                 )}
@@ -252,35 +275,16 @@ export default function Navbar() {
                   <Link onClick={closeMobileMenu} href="/migrate-resume" className="block px-4 py-3 text-indigo-700 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition-colors font-mono text-sm border border-indigo-200">
                     migrateResume()
                   </Link>
-                  <Link
-                    onClick={closeMobileMenu}
-                    href="/dashboard"
-                    className="flex items-center gap-2 px-4 py-3 text-gray-700 hover:text-blue-700 transition-colors border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50"
-                  >
-                    {authUser.avatarUrl && !avatarLoadFailed ? (
-                      <img
-                        src={authUser.avatarUrl}
-                        alt={displayName}
-                        className="w-8 h-8 rounded-full border border-gray-200 object-cover"
-                        referrerPolicy="no-referrer"
-                        onError={() => setAvatarLoadFailed(true)}
-                      />
-                    ) : (
-                      <span className="w-8 h-8 rounded-full bg-gray-900 text-white font-mono text-xs inline-flex items-center justify-center">
-                        {displayName.charAt(0).toUpperCase()}
-                      </span>
-                    )}
-                    <span className="font-mono text-sm truncate">{displayName}</span>
-                  </Link>
                   <button
                     type="button"
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-2 px-4 py-3 text-sm font-mono text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors border border-red-100"
+                    onClick={() => void handleLogout()}
+                    disabled={isLoggingOut}
+                    className="w-full flex items-center gap-2 px-4 py-3 text-sm font-mono text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors border border-red-100 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
                     </svg>
-                    logout()
+                    {isLoggingOut ? 'loggingOut...' : 'logout()'}
                   </button>
                 </>
               ) : (
