@@ -4,6 +4,7 @@ import {
   DndContext,
   closestCenter,
   PointerSensor,
+  TouchSensor,
   KeyboardSensor,
   useSensor,
   useSensors,
@@ -89,6 +90,12 @@ export default function SectionBuilder({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 },
+    }),
+    // TouchSensor is required for mobile — PointerSensor alone does not fire on touch screens
+    // because the browser intercepts touch events for scrolling before dnd-kit can activate.
+    // A short delay + tolerance lets the user still scroll normally.
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 250, tolerance: 5 },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
