@@ -27,7 +27,7 @@ export default function Hero() {
 
             <div className="flex flex-col sm:flex-row gap-4">
               <Link 
-                href="https://drive.google.com/drive/folders/1vvubNiNug3sqyMhbb1eL58K1h0DU4GUK?usp=sharing"
+                href="https://chromewebstore.google.com/detail/swiftly-%E2%80%93-job-application/emoalmecagmliemamdbmnmkgednhpldg"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-8 py-4 bg-linear-to-r from-blue-600 to-blue-700 text-white text-lg font-medium rounded-full hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg shadow-blue-500/30 text-center group"
