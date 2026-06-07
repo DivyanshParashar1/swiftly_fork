@@ -14,9 +14,9 @@ const Auth = new AuthService()
 const options: CookieOptions = {
     httpOnly: true,
     secure: true,
-    sameSite: "none",
-    domain: ".swiftly.nakshjoshi.in",
-    path: "/",
+    // sameSite: "none",
+    // domain: ".swiftly.nakshjoshi.in",
+    // path: "/",
 }
 
 export const signUp = asyncHandler(async (req: Request, res: Response) => {

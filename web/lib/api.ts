@@ -473,6 +473,44 @@ export const authApi = {
       handleAxiosError(error);
     }
   },
+
+  /**
+   * Fetch WebAuthn credential creation options from the backend.
+   * Called at the start of the passkey registration flow.
+   */
+  passkeyRegisterOptions: async (): Promise<ApiResponse<Record<string, unknown>>> => {
+    try {
+      const response = await apiClient.post<ApiResponse<Record<string, unknown>>>(
+        '/api/v1/auth/passkey/register/options'
+      );
+      return toApiResponse<Record<string, unknown>>(response.data, 'Passkey options fetched');
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
+
+  /**
+   * Verify the signed WebAuthn attestation on the backend to complete registration.
+   */
+  passkeyRegisterVerify: async (credential: {
+    id: string;
+    rawId: string;
+    type: string;
+    response: {
+      clientDataJSON: string;
+      attestationObject: string;
+    };
+  }): Promise<ApiResponse<null>> => {
+    try {
+      const response = await apiClient.post<ApiResponse<null>>(
+        '/api/v1/auth/passkey/register/verify',
+        credential
+      );
+      return toApiResponse<null>(response.data, 'Passkey registered successfully');
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
 };
 
 export const resumeApi = {

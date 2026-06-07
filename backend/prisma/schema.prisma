@@ -54,6 +54,13 @@ model AuthAccount {
   @@index([userId])
 }
 
+model Passkey {
+
+  id String @id @default(uuid())
+  devicePasskeyID String @unique
+  
+}
+
 model Session {
   id           String   @id @default(uuid())
   userId       String
