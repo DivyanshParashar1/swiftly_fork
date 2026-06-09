@@ -1,6 +1,6 @@
 import { generateRegistrationOptions } from "@simplewebauthn/server";
 
-async function generateOptions(userId:string, userEmail:string, fullName:string, userPasskeys:Array<{credentialID:string, userId:string}>) {
+export async function generateOptions(userId:string, userEmail:string, fullName:string, userPasskeys:Array<{credentialID:string, userId:string}>) {
 
 
     const encodedId = new TextEncoder().encode(userId);

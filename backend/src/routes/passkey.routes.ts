@@ -3,5 +3,7 @@ import { authMiddleware } from "../middlewares/auth.middleware";
 
 const passkeyRouter = Router()
 
-passkeyRouter.route('/setup-passkey').get()
-passkeyRouter.route('/setup-passkey').post()
+passkeyRouter.route('/generate-passkey-options').get(authMiddleware,)
+passkeyRouter.route('/setup-passkey').post(authMiddleware,)
+
+export default passkeyRouter

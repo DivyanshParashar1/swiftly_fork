@@ -37,6 +37,7 @@ model User {
   authAccount AuthAccount[]
   resume      Resume[]
   sessions    Session[]
+  passkeys    Passkey[]
 }
 
 model AuthAccount {
@@ -57,8 +58,20 @@ model AuthAccount {
 model Passkey {
 
   id String @id @default(uuid())
-  devicePasskeyID String @unique
+  credentialID String @unique
+  publicKey Bytes
+  counter BigInt
+
+  name String?
+  deviceType String?
   
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade) 
+  @@index([userId])
+  @@unique([userId, credentialID])
 }
 
 model Session {
