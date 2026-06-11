@@ -64,6 +64,10 @@ export const verifyPasskey = asyncHandler(async(req:AuthRequest, res:Response, n
         .clearCookie("challenge", {
             domain: ".swiftly.nakshjoshi.in",
             path: "/",
+            signed:true,
+            secure:true,
+            sameSite:"none",
+            httpOnly:true
         })
         .json(new ApiResponse(200, null, "Passkey registered successfully"))
 
