@@ -47,11 +47,24 @@ export default function PasskeySetup({ onClose, className = '' }: PasskeySetupPr
 					optionsJSON: optionsRes.data as unknown as PublicKeyCredentialCreationOptionsJSON,
 				});
 			} catch (error: unknown) {
-				// User clicked "Cancel" on the TouchID/Windows Hello prompt
+				// Log the real error so it's visible in browser DevTools → Console
+				console.error('[PasskeySetup] startRegistration failed:', {
+					name: error instanceof Error ? error.name : 'unknown',
+					message: error instanceof Error ? error.message : String(error),
+				});
+
 				if (error instanceof Error && error.name === 'NotAllowedError') {
+					// User cancelled or hardware prompt timed out
 					enqueueSnackbar('Passkey setup was cancelled or timed out.', { variant: 'info' });
+				} else if (error instanceof Error && error.name === 'SecurityError') {
+					// rpId doesn't match the page's domain — config issue
+					enqueueSnackbar(`Security error: ${error.message}`, { variant: 'error' });
+				} else if (error instanceof Error && error.name === 'InvalidStateError') {
+					// A passkey already exists for this user on this device
+					enqueueSnackbar('A passkey for this account already exists on this device.', { variant: 'warning' });
 				} else {
-					enqueueSnackbar('Passkey setup was cancelled.', { variant: 'info' });
+					const msg = error instanceof Error ? error.message : 'Passkey setup failed.';
+					enqueueSnackbar(msg, { variant: 'error' });
 				}
 				return;
 			}
