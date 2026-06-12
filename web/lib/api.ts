@@ -480,8 +480,8 @@ export const authApi = {
    */
   passkeyRegisterOptions: async (): Promise<ApiResponse<Record<string, unknown>>> => {
     try {
-      const response = await apiClient.post<ApiResponse<Record<string, unknown>>>(
-        '/api/v1/auth/passkey/register/options'
+      const response = await apiClient.get<ApiResponse<Record<string, unknown>>>(
+        '/api/v1/auth/passkey/generate-passkey-options'
       );
       return toApiResponse<Record<string, unknown>>(response.data, 'Passkey options fetched');
     } catch (error) {
@@ -492,21 +492,44 @@ export const authApi = {
   /**
    * Verify the signed WebAuthn attestation on the backend to complete registration.
    */
-  passkeyRegisterVerify: async (credential: {
-    id: string;
-    rawId: string;
-    type: string;
-    response: {
-      clientDataJSON: string;
-      attestationObject: string;
-    };
-  }): Promise<ApiResponse<null>> => {
+  passkeyRegisterVerify: async (credential: Record<string, unknown>): Promise<ApiResponse<null>> => {
     try {
       const response = await apiClient.post<ApiResponse<null>>(
-        '/api/v1/auth/passkey/register/verify',
+        '/api/v1/auth/passkey/verify-passkey',
         credential
       );
       return toApiResponse<null>(response.data, 'Passkey registered successfully');
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
+
+  /**
+   * Fetch WebAuthn authentication options from the backend.
+   * Called at the start of the passkey login flow.
+   */
+  passkeyLoginOptions: async (): Promise<ApiResponse<Record<string, unknown>>> => {
+    try {
+      const response = await apiClient.get<ApiResponse<Record<string, unknown>>>(
+        '/api/v1/auth/passkey/generate-login-options'
+      );
+      return toApiResponse<Record<string, unknown>>(response.data, 'Passkey login options fetched');
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  },
+
+  /**
+   * Verify the signed WebAuthn assertion to complete passkey login.
+   * On success the backend sets access_token + refresh_token cookies.
+   */
+  passkeyLoginVerify: async (credential: Record<string, unknown>): Promise<ApiResponse<AuthUser>> => {
+    try {
+      const response = await apiClient.post<ApiResponse<AuthUser>>(
+        '/api/v1/auth/passkey/verify-login',
+        credential
+      );
+      return toApiResponse<AuthUser>(response.data, 'Passkey login successful');
     } catch (error) {
       handleAxiosError(error);
     }

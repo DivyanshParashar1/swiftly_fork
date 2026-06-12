@@ -2,29 +2,14 @@
 
 import { useState } from 'react';
 import { useSnackbar } from 'notistack';
+import { startRegistration } from '@simplewebauthn/browser';
+import type { PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/browser';
 import { authApi } from '@/lib/api';
-
-// ── Passkey helpers ────────────────────────────────────────────────────────────
-
-function base64urlToBuffer(base64url: string): ArrayBuffer {
-	const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
-	const binary = atob(base64);
-	const buffer = new Uint8Array(binary.length);
-	for (let i = 0; i < binary.length; i++) buffer[i] = binary.charCodeAt(i);
-	return buffer.buffer;
-}
-
-function bufferToBase64url(buffer: ArrayBuffer): string {
-	const bytes = new Uint8Array(buffer);
-	let binary = '';
-	bytes.forEach((b) => (binary += String.fromCharCode(b)));
-	return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-}
 
 // ── Props ──────────────────────────────────────────────────────────────────────
 
 type PasskeySetupProps = {
-	/** Called after the dropdown closes so the parent can close the menu */
+	/** Called after successful registration so the parent can close the menu */
 	onClose?: () => void;
 	/** Extra class names for the button wrapper */
 	className?: string;
@@ -51,65 +36,43 @@ export default function PasskeySetup({ onClose, className = '' }: PasskeySetupPr
 		try {
 			// ── Step 1: Request registration options from backend ──────────────
 			const optionsRes = await authApi.passkeyRegisterOptions();
-			const options = optionsRes.data as PublicKeyCredentialCreationOptions & {
-				challenge: string;
-				user: { id: string; name: string; displayName: string };
-				excludeCredentials?: { id: string; type: string; transports?: string[] }[];
-			};
+			if (!optionsRes.success) {
+				throw new Error(optionsRes.message || 'Failed to get passkey options');
+			}
 
-			// ── Step 2: Decode challenge & user.id from base64url ─────────────
-			const publicKey: PublicKeyCredentialCreationOptions = {
-				...options,
-				challenge: base64urlToBuffer(options.challenge as unknown as string),
-				user: {
-					...options.user,
-					id: base64urlToBuffer(options.user.id as unknown as string),
-				},
-				excludeCredentials: options.excludeCredentials?.map((c) => ({
-					...c,
-					id: base64urlToBuffer(c.id),
-					type: 'public-key' as PublicKeyCredentialType,
-				})),
-			};
-
-			// ── Step 3: Trigger the browser passkey creation prompt ────────────
-			const credential = (await navigator.credentials.create({
-				publicKey,
-			})) as PublicKeyCredential | null;
-
-			if (!credential) {
-				enqueueSnackbar('Passkey setup was cancelled.', { variant: 'warning' });
+			// ── Step 2: Trigger the browser passkey creation hardware prompt ───
+			let credentialPayload;
+			try {
+				credentialPayload = await startRegistration({
+					optionsJSON: optionsRes.data as PublicKeyCredentialCreationOptionsJSON,
+				});
+			} catch (error: unknown) {
+				// User clicked "Cancel" on the TouchID/Windows Hello prompt
+				if (error instanceof Error && error.name === 'NotAllowedError') {
+					enqueueSnackbar('Passkey setup was cancelled or timed out.', { variant: 'info' });
+				} else {
+					enqueueSnackbar('Passkey setup was cancelled.', { variant: 'info' });
+				}
 				return;
 			}
 
-			const response = credential.response as AuthenticatorAttestationResponse;
+			// ── Step 3: Send the hardware signature back to backend ────────────
+			const verifyRes = await authApi.passkeyRegisterVerify(
+				credentialPayload as unknown as Record<string, unknown>
+			);
 
-			// ── Step 4: Send the credential back to backend ────────────────────
-			await authApi.passkeyRegisterVerify({
-				id: credential.id,
-				rawId: bufferToBase64url(credential.rawId),
-				type: credential.type,
-				response: {
-					clientDataJSON: bufferToBase64url(response.clientDataJSON),
-					attestationObject: bufferToBase64url(response.attestationObject),
-				},
-			});
+			if (!verifyRes.success) {
+				throw new Error(verifyRes.message || 'Passkey verification failed');
+			}
 
-			enqueueSnackbar('Passkey registered successfully! You can now sign in with your passkey.', {
+			enqueueSnackbar('Passkey registered! You can now sign in with your passkey.', {
 				variant: 'success',
 			});
 			onClose?.();
 		} catch (error: unknown) {
-			// User cancelled the native dialog
-			if (error instanceof DOMException && error.name === 'NotAllowedError') {
-				enqueueSnackbar('Passkey setup was cancelled or timed out.', { variant: 'info' });
-			} else if (error instanceof Error) {
-				enqueueSnackbar(error.message || 'Failed to register passkey. Please try again.', {
-					variant: 'error',
-				});
-			} else {
-				enqueueSnackbar('Failed to register passkey. Please try again.', { variant: 'error' });
-			}
+			const message =
+				error instanceof Error ? error.message : 'Failed to register passkey. Please try again.';
+			enqueueSnackbar(message, { variant: 'error' });
 		} finally {
 			setIsLoading(false);
 		}

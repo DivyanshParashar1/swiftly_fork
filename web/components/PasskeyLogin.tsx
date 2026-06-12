@@ -1,33 +1,17 @@
 'use client';
 
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useSnackbar } from "notistack";
-import { setAuthUser } from "@/lib/authSession";
-import { authApi } from "@/lib/api";
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useSnackbar } from 'notistack';
+import { startAuthentication } from '@simplewebauthn/browser';
+import type { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/browser';
+import { setAuthUser } from '@/lib/authSession';
+import { authApi } from '@/lib/api';
 
 type PasskeyLoginProps = {
 	mode?: 'signin' | 'signup';
 	className?: string;
 };
-
-// ── Passkey helpers ────────────────────────────────────────────────────────────
-// These wrap the WebAuthn browser API calls so the component stays clean.
-
-function base64urlToBuffer(base64url: string): ArrayBuffer {
-	const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
-	const binary = atob(base64);
-	const buffer = new Uint8Array(binary.length);
-	for (let i = 0; i < binary.length; i++) buffer[i] = binary.charCodeAt(i);
-	return buffer.buffer;
-}
-
-function bufferToBase64url(buffer: ArrayBuffer): string {
-	const bytes = new Uint8Array(buffer);
-	let binary = '';
-	bytes.forEach((b) => (binary += String.fromCharCode(b)));
-	return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-}
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
@@ -43,7 +27,57 @@ export default function PasskeyLogin({ mode = 'signin', className = '' }: Passke
 	const isSupported = typeof window !== 'undefined' && !!window.PublicKeyCredential;
 
 	const handlePasskey = async () => {
-		
+		if (!isSupported) {
+			enqueueSnackbar('Passkeys are not supported by your browser.', { variant: 'warning' });
+			return;
+		}
+
+		setIsLoading(true);
+		try {
+			// ── Step 1: Request login challenge from backend ───────────────────
+			const optionsRes = await authApi.passkeyLoginOptions();
+			if (!optionsRes.success) {
+				throw new Error(optionsRes.message || 'Failed to get login options');
+			}
+
+			// ── Step 2: Trigger the browser passkey hardware prompt ────────────
+			let credentialPayload;
+			try {
+				credentialPayload = await startAuthentication({
+					optionsJSON: optionsRes.data as PublicKeyCredentialRequestOptionsJSON,
+				});
+			} catch (error: unknown) {
+				// User clicked "Cancel" on the TouchID/Windows Hello prompt
+				if (error instanceof Error && error.name === 'NotAllowedError') {
+					enqueueSnackbar('Login cancelled or timed out.', { variant: 'info' });
+				} else {
+					enqueueSnackbar('Login was cancelled.', { variant: 'info' });
+				}
+				return;
+			}
+
+			// ── Step 3: Verify the hardware signature with the backend ─────────
+			const verifyRes = await authApi.passkeyLoginVerify(
+				credentialPayload as unknown as Record<string, unknown>
+			);
+
+			if (!verifyRes.success) {
+				throw new Error(verifyRes.message || 'Passkey login failed');
+			}
+
+			// Backend set the JWT cookies — persist user in localStorage and redirect
+			if (verifyRes.data) {
+				setAuthUser(verifyRes.data);
+			}
+			enqueueSnackbar('Signed in successfully!', { variant: 'success' });
+			router.push('/dashboard');
+		} catch (error: unknown) {
+			const message =
+				error instanceof Error ? error.message : 'Failed to sign in. Please try again.';
+			enqueueSnackbar(message, { variant: 'error' });
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	const label = mode === 'signup' ? 'signUpWithPasskey()' : 'signInWithPasskey()';
@@ -60,7 +94,7 @@ export default function PasskeyLogin({ mode = 'signin', className = '' }: Passke
 					: 'border-gray-400/80 bg-white text-gray-900 hover:-translate-y-0.5 hover:border-violet-500 hover:shadow-[0_18px_40px_rgba(139,92,246,0.18)]'
 			} ${className}`.trim()}
 			aria-label={label}
-			onClick={handlePasskey}
+			onClick={() => void handlePasskey()}
 			title={!isSupported ? 'Passkeys are not supported by your browser.' : undefined}
 		>
 			{/* Shimmer overlay on hover */}
