@@ -11,7 +11,7 @@ import { log } from "node:console";
 
 
 const Auth = new AuthService()
-const options: CookieOptions = {
+export const options: CookieOptions = {
     httpOnly: true,
     secure: true,
     // sameSite: "none",

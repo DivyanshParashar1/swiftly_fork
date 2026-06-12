@@ -1,7 +1,11 @@
-import { generateRegistrationOptions, verifyRegistrationResponse, type RegistrationResponseJSON } from "@simplewebauthn/server";
-import type { VerifiedRegistrationResponse } from "@simplewebauthn/server";
+import { generateAuthenticationOptions, generateRegistrationOptions, verifyAuthenticationResponse, verifyRegistrationResponse, type RegistrationResponseJSON } from "@simplewebauthn/server";
+import type { AuthenticationResponseJSON, AuthenticatorTransportFuture, PublicKeyCredentialRequestOptionsJSON, VerifiedRegistrationResponse, WebAuthnCredential } from "@simplewebauthn/server";
 import prisma from "../config/prisma";
 import type { Bytes } from "@prisma/client/runtime/client";
+import type { Passkey } from "../../generated/prisma/browser";
+
+
+// methods for passkey registration
 
 export async function generateOptions(userId:string, userEmail:string, fullName:string, userPasskeys:Array<{credentialID:string, userId:string}>) {
 
@@ -43,10 +47,10 @@ export async function getUserPasskeys(userId:string){
 }
 
 
-export async function verifOptions(credentialPayload:RegistrationResponseJSON, challengeFromCookie:string, ): Promise<VerifiedRegistrationResponse> {
+export async function verifyOptions(credentialPayload:RegistrationResponseJSON, expectedChallenge:string, ): Promise<VerifiedRegistrationResponse> {
     const verification = await verifyRegistrationResponse({
         response: credentialPayload,
-        expectedChallenge:challengeFromCookie,
+        expectedChallenge,
         expectedOrigin:process.env.FRONTEND_URL as string || "http://localhost:3000",
         expectedRPID: process.env.DOMAIN_NAME as string || "localhost",
 
@@ -71,4 +75,51 @@ export async function savePasskeyToDB(credentialID:string, publicKey:Bytes, coun
 
     })
 
+}
+
+
+// methods for passkey login
+
+export async function generateLoginOptions(): Promise<PublicKeyCredentialRequestOptionsJSON>{
+    return await generateAuthenticationOptions({
+        rpID: process.env.DOMAIN_NAME as string || "localhost",
+        userVerification: "preferred",
+    })
+}
+
+export async function getPasskeyAndUserFromCredentialID(credentialID:string){
+
+    return await prisma.passkey.findUnique({
+        where:{credentialID},
+        include:{user:true}
+    })
+
+
+
+}
+
+export async function updateCounter(credentialID:string, counter:bigint){
+    await prisma.passkey.update({
+        where:{credentialID},
+        data:{counter:counter}
+    })
+
+}
+
+
+export async function verifyLogin(credentialPayload:AuthenticationResponseJSON, expectedChallenge:string, savedPasskey:Passkey){
+
+    const credential:WebAuthnCredential ={
+        id:savedPasskey.id,
+        publicKey: new Uint8Array(savedPasskey.publicKey),
+        counter: Number(savedPasskey.counter),
+        transports: savedPasskey.name?.split(', ') as AuthenticatorTransportFuture[]
+    }
+    return await verifyAuthenticationResponse({
+        response: credentialPayload,
+        expectedChallenge,
+        expectedOrigin:process.env.FRONTEND_URL as string || "http://localhost:3000",
+        expectedRPID: process.env.DOMAIN_NAME as string || "localhost",
+        credential        
+    })
 }
