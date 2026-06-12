@@ -117,6 +117,8 @@ export const verifyPasskeyLogin = asyncHandler(async(req:AuthRequest, res: Respo
     const accessToken = generateAccessToken(passkeyWithUser.userId)
     const refreshToken = generateRefreshToken(passkeyWithUser.userId)
 
+    await authService.saveRefreshToken(passkeyWithUser.userId, refreshToken)
+
     res
     .status(200)
     .clearCookie("login_challenge",{
