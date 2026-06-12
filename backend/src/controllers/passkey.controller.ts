@@ -129,7 +129,7 @@ export const verifyPasskeyLogin = asyncHandler(async (req: AuthRequest, res: Res
             sameSite: "none",
             httpOnly: true
         })
-        .cookie("access_token", accessToken, options)
-        .cookie("refresh_token", refreshToken, options)
+        .cookie("accessToken", accessToken, options)    // matches req.cookies?.accessToken in auth middleware
+        .cookie("refreshToken", refreshToken, options)  // matches req.cookies.refreshToken in refresh endpoint
         .json(new ApiResponse(200, passkeyWithUser.user, "Passkey login successful"))
 })
