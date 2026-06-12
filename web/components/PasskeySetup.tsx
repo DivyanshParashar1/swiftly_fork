@@ -44,7 +44,7 @@ export default function PasskeySetup({ onClose, className = '' }: PasskeySetupPr
 			let credentialPayload;
 			try {
 				credentialPayload = await startRegistration({
-					optionsJSON: optionsRes.data as PublicKeyCredentialCreationOptionsJSON,
+					optionsJSON: optionsRes.data as unknown as PublicKeyCredentialCreationOptionsJSON,
 				});
 			} catch (error: unknown) {
 				// User clicked "Cancel" on the TouchID/Windows Hello prompt

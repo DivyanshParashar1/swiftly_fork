@@ -44,7 +44,7 @@ export default function PasskeyLogin({ mode = 'signin', className = '' }: Passke
 			let credentialPayload;
 			try {
 				credentialPayload = await startAuthentication({
-					optionsJSON: optionsRes.data as PublicKeyCredentialRequestOptionsJSON,
+					optionsJSON: optionsRes.data as unknown as PublicKeyCredentialRequestOptionsJSON,
 				});
 			} catch (error: unknown) {
 				// User clicked "Cancel" on the TouchID/Windows Hello prompt
