@@ -118,6 +118,19 @@ export default function SignUpPage() {
 
         {/* Form Card */}
         <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50 p-8">
+          {/* Social auth */}
+          <GoogleLogin mode="signup" />
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t-2 border-gray-200"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white text-gray-500 font-mono">// or</span>
+            </div>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Full Name */}
             <div>
@@ -231,18 +244,6 @@ export default function SignUpPage() {
               )}
             </button>
           </form>
-
-          {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t-2 border-gray-200"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-gray-500 font-mono">// or</span>
-            </div>
-          </div>
-
-          <GoogleLogin mode="signup" />
 
           {/* Sign In Link */}
           <div className="text-center">

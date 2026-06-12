@@ -7,6 +7,7 @@ import { useSnackbar } from 'notistack';
 import { ApiError, authApi } from '@/lib/api';
 import { AUTH_USER_CHANGED_EVENT, clearAuthUser, getAuthUser } from '@/lib/authSession';
 import type { AuthUser } from '@/lib/api';
+import PasskeySetup from './PasskeySetup';
 
 export default function Navbar() {
   const router = useRouter();
@@ -174,8 +175,8 @@ export default function Navbar() {
                 </button>
 
                 {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-50 animate-fade-in">
-                    <Link
+                  <div className="absolute right-0 mt-2 w-52 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-50 animate-fade-in">
+                    {/* <Link
                       href="/dashboard"
                       onClick={() => setIsUserMenuOpen(false)}
                       className="flex items-center gap-2 px-4 py-2.5 text-sm font-mono text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors"
@@ -188,6 +189,8 @@ export default function Navbar() {
                       </svg>
                       dashboard()
                     </Link>
+                    <div className="my-1 border-t border-gray-100" /> */}
+                    <PasskeySetup onClose={() => setIsUserMenuOpen(false)} />
                     <div className="my-1 border-t border-gray-100" />
                     <button
                       type="button"
@@ -275,6 +278,7 @@ export default function Navbar() {
                   <Link onClick={closeMobileMenu} href="/migrate-resume" className="block px-4 py-3 text-indigo-700 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition-colors font-mono text-sm border border-indigo-200">
                     migrateResume()
                   </Link>
+                  <PasskeySetup onClose={closeMobileMenu} className="rounded-lg border border-violet-100 py-3" />
                   <button
                     type="button"
                     onClick={() => void handleLogout()}

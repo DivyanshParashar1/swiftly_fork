@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSnackbar } from 'notistack';
 import GoogleLogin from '@/components/GoogleLogin';
+import PasskeyLogin from '@/components/PasskeyLogin';
 import { authApi, ApiError, resumeApi } from '@/lib/api';
 import { setAuthUser } from '@/lib/authSession';
 
@@ -102,6 +103,21 @@ export default function SignInPage() {
         </div>
 
         <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50 p-8">
+          {/* Social auth — Google first, then Passkey */}
+          <div className="space-y-3">
+            <GoogleLogin mode="signin" />
+            <PasskeyLogin mode="signin" />
+          </div>
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t-2 border-gray-200"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white text-gray-500 font-mono">// or</span>
+            </div>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="email" className="block text-sm font-mono font-medium text-gray-700 mb-2">
@@ -157,17 +173,6 @@ export default function SignInPage() {
               )}
             </button>
           </form>
-
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t-2 border-gray-200"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-gray-500 font-mono">// or</span>
-            </div>
-          </div>
-
-          <GoogleLogin mode="signin" />
 
           <div className="text-center">
             <p className="text-gray-600">

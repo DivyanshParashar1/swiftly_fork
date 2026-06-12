@@ -6,6 +6,7 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/express": "^5.0.6",
+    "@types/express-session": "^1.19.0",
     "@types/handlebars": "^4.0.40",
     "@types/node": "^25.3.3",
     "tsx": "^4.22.0"
@@ -24,6 +25,7 @@
     "@prisma/adapter-neon": "^7.8.0",
     "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "^7.4.2",
+    "@simplewebauthn/server": "^13.3.1",
     "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
@@ -38,6 +40,7 @@
     "crypto": "^1.0.1",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
+    "express-session": "^1.19.0",
     "file-type": "^21.3.0",
     "googleapis": "^171.4.0",
     "groq-sdk": "^0.37.0",
