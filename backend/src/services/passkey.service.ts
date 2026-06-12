@@ -3,9 +3,10 @@ import type { AuthenticationResponseJSON, AuthenticatorTransportFuture, PublicKe
 import prisma from "../config/prisma";
 import type { Bytes } from "@prisma/client/runtime/client";
 import type { Passkey } from "../../generated/prisma/browser";
+import { log } from "node:console";
+import "dotenv/config";
 
-
-// methods for passkey registration
+// methods for passkey registration\
 
 export async function generateOptions(userId:string, userEmail:string, fullName:string, userPasskeys:Array<{credentialID:string, userId:string}>) {
 
@@ -13,7 +14,7 @@ export async function generateOptions(userId:string, userEmail:string, fullName:
     const encodedId = new TextEncoder().encode(userId);
     const options = await generateRegistrationOptions({
         rpName:"Swiftly",
-        rpID:"localhost",
+        rpID: process.env.DOMAIN_NAME || "localhost",
         userID: encodedId,
         userName: userEmail,
         userDisplayName: `${fullName} - ${userEmail}`,
@@ -21,13 +22,12 @@ export async function generateOptions(userId:string, userEmail:string, fullName:
         excludeCredentials: userPasskeys.map(passkey => ({
             id: passkey.credentialID,
             type :'public-key',
-            
         })),
         authenticatorSelection: {
             residentKey: 'required',
             userVerification: 'preferred',
         },
-        attestationType: 'none'        
+        attestationType: 'none',
     })
     return options
 }
@@ -51,9 +51,9 @@ export async function verifyOptions(credentialPayload:RegistrationResponseJSON, 
     const verification = await verifyRegistrationResponse({
         response: credentialPayload,
         expectedChallenge,
-        expectedOrigin:process.env.FRONTEND_URL as string || "http://localhost:3000",
-        expectedRPID: process.env.DOMAIN_NAME as string || "localhost",
-
+        expectedOrigin: process.env.FRONTEND_URL || "http://localhost:3000",
+        expectedRPID: process.env.DOMAIN_NAME || "localhost",
+        requireUserVerification: false,  
     })
 
     return verification
@@ -118,8 +118,9 @@ export async function verifyLogin(credentialPayload:AuthenticationResponseJSON, 
     return await verifyAuthenticationResponse({
         response: credentialPayload,
         expectedChallenge,
-        expectedOrigin:process.env.FRONTEND_URL as string || "http://localhost:3000",
+        expectedOrigin: process.env.FRONTEND_URL as string || "http://localhost:3000",
         expectedRPID: process.env.DOMAIN_NAME as string || "localhost",
+        requireUserVerification: false,
         credential        
     })
 }
